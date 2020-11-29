@@ -1,3 +1,5 @@
+import typing
+
 from django.db.models import QuerySet, Q, F
 from django.utils.translation import gettext_lazy as _
 from django.db import models
@@ -6,7 +8,6 @@ from django.conf import settings
 
 
 class User(AbstractUser):
-
     class Role(models.TextChoices):
         HOST = 'H', _('Host')
         CHALLENGER = 'C', _('Challenger')
@@ -18,9 +19,10 @@ class User(AbstractUser):
 
 
 class CompletedMatch(models.Model):
-
-    winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='won_matches', null=True)
-    loser = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='lost_matches', null=True)
+    winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='won_matches',
+                               null=True)
+    loser = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='lost_matches',
+                              null=True)
     start_timestamp = models.DateTimeField()
     completion_timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -33,27 +35,38 @@ class CompletedMatch(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=Q(winner_score__gt=F('loser_score')), name='check_scores'),
-            models.CheckConstraint(check=Q(winner_elo_before_match__lte=F('winner_elo_after_match')), name='check_winner_elo'),
-            models.CheckConstraint(check=Q(loser_elo_before_match__gte=F('loser_elo_after_match')), name='check_loser_elo'),
-            models.CheckConstraint(check=Q(completion_timestamp__gt=F('start_timestamp')), name='check_timestamp')
+            models.CheckConstraint(check=Q(winner_score__gt=F('loser_score')),
+                                   name='check_scores'),
+            models.CheckConstraint(check=Q(winner_elo_before_match__lte=F('winner_elo_after_match')),
+                                   name='check_winner_elo'),
+            models.CheckConstraint(check=Q(loser_elo_before_match__gte=F('loser_elo_after_match')),
+                                   name='check_loser_elo'),
+            models.CheckConstraint(check=Q(completion_timestamp__gt=F('start_timestamp')),
+                                   name='check_timestamp'),
+            models.CheckConstraint(check=~Q(winner=F('loser')),
+                                   name='check_cant_play_alone')
         ]
 
 
 class OngoingMatch(models.Model):
-
     creation_timestamp = models.DateTimeField(auto_now_add=True)
     start_timestamp = models.DateTimeField(null=True)
     is_started = models.BooleanField(default=False)
     is_challenger_ready = models.BooleanField(default=False)
 
     @property
-    def host(self) -> User:
-        return self.user_set.get(role=User.Role.HOST)
+    def host(self) -> typing.Optional[User]:
+        try:
+            return self.user_set.get(role=User.Role.HOST)
+        except User.DoesNotExist:
+            return None
 
     @property
-    def challenger(self) -> User:
-        return self.user_set.get(role=User.Role.CHALLENGER)
+    def challenger(self) -> typing.Optional[User]:
+        try:
+            return self.user_set.get(role=User.Role.CHALLENGER)
+        except User.DoesNotExist:
+            return None
 
     @property
     def spectators(self) -> QuerySet:
@@ -61,5 +74,7 @@ class OngoingMatch(models.Model):
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=(Q(is_started=True) & Q(is_challenger_ready=True)) | (Q(is_started=False) & Q(is_challenger_ready=False)) | (Q(is_started=False) & Q(is_challenger_ready=True)), name='check_state')
+            models.CheckConstraint(check=(Q(is_started=True) & Q(is_challenger_ready=True))
+                                         | (Q(is_started=False) & Q(is_challenger_ready=False))
+                                         | (Q(is_started=False) & Q(is_challenger_ready=True)), name='check_state')
         ]
