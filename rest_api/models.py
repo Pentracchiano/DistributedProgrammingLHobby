@@ -1,4 +1,4 @@
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q, F
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -24,6 +24,21 @@ class CompletedMatch(models.Model):
     start_timestamp = models.DateTimeField()
     completion_timestamp = models.DateTimeField(auto_now_add=True)
 
+    winner_score = models.PositiveSmallIntegerField()
+    loser_score = models.PositiveSmallIntegerField()
+    winner_elo_before_match = models.PositiveSmallIntegerField()
+    loser_elo_before_match = models.PositiveSmallIntegerField()
+    winner_elo_after_match = models.PositiveSmallIntegerField()
+    loser_elo_after_match = models.PositiveSmallIntegerField()
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=Q(winner_score__gt=F('loser_score')), name='check_scores'),
+            models.CheckConstraint(check=Q(winner_elo_before_match__lte=F('winner_elo_after_match')), name='check_winner_elo'),
+            models.CheckConstraint(check=Q(loser_elo_before_match__gte=F('loser_elo_after_match')), name='check_loser_elo'),
+            models.CheckConstraint(check=Q(completion_timestamp__gt=F('start_timestamp')), name='check_timestamp')
+        ]
+
 
 class OngoingMatch(models.Model):
 
@@ -43,3 +58,8 @@ class OngoingMatch(models.Model):
     @property
     def spectators(self) -> QuerySet:
         return self.user_set.filter(role=User.Role.SPECTATOR)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=(Q(is_started=True) & Q(is_challenger_ready=True)) | (Q(is_started=False) & Q(is_challenger_ready=False)) | (Q(is_started=False) & Q(is_challenger_ready=True)), name='check_state')
+        ]
