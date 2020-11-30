@@ -19,11 +19,13 @@ class CompletedMatchSerializer(serializers.ModelSerializer):
 
 
 class OngoingMatchSerializer(serializers.ModelSerializer):
-    host = UserSerializer()
-    challenger = UserSerializer()
-    spectators = UserSerializer(many=True)
+    host = UserSerializer(read_only=True)
+    challenger = UserSerializer(read_only=True)
+    spectators = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = OngoingMatch
-        fields = ['host', 'spectators', 'challenger', 'creation_timestamp', 'start_timestamp', 'is_started',
+        fields = ['id', 'host', 'spectators', 'challenger', 'creation_timestamp', 'start_timestamp', 'is_started',
                   'is_challenger_ready']
+        read_only_fields = ['id', 'host', 'spectators', 'challenger', 'creation_timestamp', 'start_timestamp', 'is_started',
+                            'is_challenger_ready']

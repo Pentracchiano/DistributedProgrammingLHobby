@@ -61,6 +61,18 @@ class OngoingMatch(models.Model):
         except User.DoesNotExist:
             return None
 
+    @host.setter
+    def host(self, value: User):
+        if self.host:
+            raise ValueError('Host was already set')
+
+        if value.ongoing_match:
+            raise ValueError(f'User {value.username} is already in a match')
+
+        value.ongoing_match = self
+        value.role = User.Role.HOST
+        value.save()
+
     @property
     def challenger(self) -> typing.Optional[User]:
         try:
@@ -68,9 +80,29 @@ class OngoingMatch(models.Model):
         except User.DoesNotExist:
             return None
 
+    @challenger.setter
+    def challenger(self, value: User):
+        if self.challenger:
+            raise ValueError('Challenger was already set')
+
+        if value.ongoing_match:
+            raise ValueError(f'User {value.username} is already in a match')
+
+        value.ongoing_match = self
+        value.role = User.Role.CHALLENGER
+        value.save()
+
     @property
     def spectators(self) -> QuerySet:
         return self.user_set.filter(role=User.Role.SPECTATOR)
+
+    def add_spectator(self, value: User):
+        if value.ongoing_match:
+            raise ValueError(f'User {value.username} is already in a match')
+
+        value.ongoing_match = self
+        value.role = User.Role.SPECTATOR
+        value.save()
 
     class Meta:
         constraints = [
