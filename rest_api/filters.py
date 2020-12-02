@@ -29,9 +29,11 @@ class OngoingMatchFilter(filters.FilterSet):
 class CompletedMatchFilter(filters.FilterSet):
     end_timestamp = filters.DateTimeFromToRangeFilter('completion_timestamp')
     user = filters.CharFilter(method='filter_user')
+    winner = filters.CharFilter(field_name='winner', lookup_expr='username')
+    loser = filters.CharFilter(field_name='loser', lookup_expr='username')
 
     def filter_user(self, queryset: QuerySet, name, value):
-        return queryset.filter(winner=value) | queryset.filter(loser=value)
+        return queryset.filter(winner__username=value) | queryset.filter(loser__username=value)
 
     class Meta:
         model = CompletedMatch

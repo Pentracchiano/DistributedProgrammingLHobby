@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from rest_api.models import *
 from rest_api.serializers import *
-from rest_api.filters import OngoingMatchFilter, OrderingOngoingMatchFilter
+from rest_api.filters import OngoingMatchFilter, OrderingOngoingMatchFilter, CompletedMatchFilter
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -19,22 +19,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ['elo', 'username']
 
     # todo permission_classes = []
-
-    @action(detail=True)
-    def completed_matches(self, request, **kwargs):
-        user = self.get_object()
-
-        result = request.query_params.get('result')
-        if result == 'won':
-            matches = user.won_matches.all()
-        elif result == 'lost':
-            matches = user.lost_matches.all()
-        else:
-            matches = CompletedMatch.objects.filter(Q(winner=user) | Q(loser=user))
-
-        serializer = CompletedMatchSerializer(matches, many=True)
-        return Response(serializer.data)
-
     @action(detail=True)
     def ongoing_match(self, request, **kwargs):
         user = self.get_object()
@@ -102,6 +86,6 @@ class CompletedMatchViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CompletedMatch.objects.all()
     serializer_class = CompletedMatchSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-
+    filterset_class = CompletedMatchFilter
 
 
