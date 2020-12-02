@@ -1,6 +1,6 @@
 from django.db.models import QuerySet
 from django_filters import rest_framework as filters
-from rest_api.models import OngoingMatch, User
+from rest_api.models import OngoingMatch, User, CompletedMatch
 from rest_framework.filters import OrderingFilter
 
 
@@ -26,6 +26,18 @@ class OngoingMatchFilter(filters.FilterSet):
         fields = ['min_elo', 'max_elo', 'is_started', 'is_full']
 
 
+class CompletedMatchFilter(filters.FilterSet):
+    end_timestamp = filters.DateTimeFromToRangeFilter('completion_timestamp')
+    user = filters.CharFilter(method='filter_user')
+
+    def filter_user(self, queryset: QuerySet, name, value):
+        return queryset.filter(winner=value) | queryset.filter(loser=value)
+
+    class Meta:
+        model = CompletedMatch
+        fields = ['winner', 'loser', 'end_timestamp', 'user']
+
+
 class OrderingOngoingMatchFilter(OrderingFilter):
 
     elo_lookup = {
@@ -45,3 +57,6 @@ class OrderingOngoingMatchFilter(OrderingFilter):
             return queryset.order_by(*ordering)
 
         return queryset
+
+
+

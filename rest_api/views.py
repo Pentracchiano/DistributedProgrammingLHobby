@@ -99,6 +99,9 @@ class OngoingMatchViewSet(mixins.CreateModelMixin,
 
 
 class CompletedMatchViewSet(viewsets.ReadOnlyModelViewSet):
-    pass
+    queryset = CompletedMatch.objects.all()
+    serializer_class = CompletedMatchSerializer
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+
 
 
