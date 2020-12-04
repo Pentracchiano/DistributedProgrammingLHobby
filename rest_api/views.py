@@ -1,10 +1,11 @@
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters, mixins, status
-from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import action, permission_classes, api_view
+from rest_framework.exceptions import PermissionDenied, NotFound, NotAuthenticated
 from rest_framework.response import Response
-
+from rest_framework.authtoken.models import Token
 from rest_api.models import *
 from rest_api.serializers import *
 from rest_api.filters import OngoingMatchFilter, OrderingOngoingMatchFilter, CompletedMatchFilter
@@ -18,7 +19,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['elo', 'username']
 
-    # todo permission_classes = []
     @action(detail=True)
     def ongoing_match(self, request, **kwargs):
         user = self.get_object()
@@ -29,6 +29,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = OngoingMatchSerializer(ongoing)
         return Response(serializer.data)
+
+    @action(methods=['POST'], detail=False, permission_classes=[])
+    def sign_up(self, request, *args, **kwargs):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class OngoingMatchViewSet(mixins.CreateModelMixin,
@@ -43,13 +50,13 @@ class OngoingMatchViewSet(mixins.CreateModelMixin,
     filterset_class = OngoingMatchFilter
 
     def create(self, request, *args, **kwargs):
-        new_ongoing_match = OngoingMatch()
-        try:
-            new_ongoing_match.host = request.user
-        except ValueError as e:
-            raise serializers.ValidationError(str(e))
+        with transaction.atomic():
+            new_ongoing_match = OngoingMatch.objects.create()
+            try:
+                new_ongoing_match.host = request.user
+            except ValueError as e:
+                raise serializers.ValidationError(str(e))
 
-        new_ongoing_match.save()
         serializer = OngoingMatchSerializer(instance=new_ongoing_match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -89,3 +96,12 @@ class CompletedMatchViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = CompletedMatchFilter
 
 
+class ObtainDeleteToken(ObtainAuthToken):
+    def delete(self, request, format=None):
+        if request.auth is None:
+            raise NotAuthenticated
+        try:
+            Token.objects.get(key=request.auth).delete()
+        except Token.DoesNotExist:
+            raise NotAuthenticated('Invalid token.')
+        return Response(status=status.HTTP_204_NO_CONTENT)
