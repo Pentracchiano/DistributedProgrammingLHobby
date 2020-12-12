@@ -1,4 +1,10 @@
-class Position:
+class Position2D:
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+
+class Speed2D:
     def __init__(self, x: float, y: float):
         self.x = x
         self.y = y
