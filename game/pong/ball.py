@@ -33,9 +33,7 @@ class Ball:
         return has_bounced
 
     def check_paddle_collision(self, paddle: Paddle) -> bool:
-        return ((self.position.y <= paddle.position.y + self.radius + paddle.height / 2
-                 or self.position.y >= paddle.position.y - self.radius - paddle.height / 2)
-                and (
-                        self.position.x <= paddle.position.x + paddle.width + self.radius
-                        or self.position.x <= paddle.position.x - paddle.width - self.radius
-                ))
+        return ((self.position.x >= 1 - paddle.width / 2 - self.radius
+                 or self.position.x <= 0 + paddle.width / 2 + self.radius)
+                and paddle.position.y + self.radius + paddle.height / 2 >= self.position.y >=
+                paddle.position.y - self.radius - paddle.height / 2)

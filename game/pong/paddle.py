@@ -24,13 +24,13 @@ class Paddle:
 
     def move(self, delta_t: float, command: PaddleCommand) -> bool:
         if command == PaddleCommand.UP:
-            self.speed += self.acceleration
-        elif command == PaddleCommand.FAST_UP:
-            self.speed += self.acceleration * self.acceleration_fast_factor
-        elif command == PaddleCommand.DOWN:
             self.speed -= self.acceleration
-        elif command == PaddleCommand.FAST_DOWN:
+        elif command == PaddleCommand.FAST_UP:
             self.speed -= self.acceleration * self.acceleration_fast_factor
+        elif command == PaddleCommand.DOWN:
+            self.speed += self.acceleration
+        elif command == PaddleCommand.FAST_DOWN:
+            self.speed += self.acceleration * self.acceleration_fast_factor
         elif command == PaddleCommand.NO_INPUT:
             self.speed /= self.braking_factor
 

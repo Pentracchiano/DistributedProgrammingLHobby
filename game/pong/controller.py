@@ -11,19 +11,19 @@ class Controller:
         self.output = output
 
         self.paddle_left = Paddle(
-            position=Position2D(0, 0.5),
+            position=Position2D(0+PADDLE_WIDTH/2, 0.5),
             speed=0,
-            width=0.05,
-            height=0.1,
+            width=PADDLE_WIDTH,
+            height=PADDLE_HEIGHT,
             acceleration=0.1,
             acceleration_fast_factor=3,
             braking_factor=1.5
         )
         self.paddle_right = Paddle(
-            position=Position2D(1, 0.5),
+            position=Position2D(1-PADDLE_WIDTH/2, 0.5),
             speed=0,
-            width=0.05,
-            height=0.1,
+            width=PADDLE_WIDTH,
+            height=PADDLE_HEIGHT,
             acceleration=0.1,
             acceleration_fast_factor=3,
             braking_factor=1.5
@@ -40,13 +40,19 @@ class Controller:
         self.match_time = 0
         self.MAX_MATCH_TIME = 5 * 60
 
+        self.output.init({
+            "ball_radius": BALL_RADIUS,
+            "paddle_height": PADDLE_HEIGHT,
+            "paddle_width": PADDLE_WIDTH
+        })
+
         self.stop = False
         self.game_thread = threading.Thread(target=self.run_game)
         self.game_thread.start()
 
     def run_game(self):
         while not self.stop:
-            current_time = time.time()
+            current_time = time.perf_counter()
 
             self.update_game()
             if self.left_score >= 5 or self.right_score >= 5:
@@ -59,7 +65,7 @@ class Controller:
                 else:
                     self.sudden_death = True
 
-            end_time = time.time()
+            end_time = time.perf_counter()
             elapsed = end_time - current_time
             remaining = self.game_tick_time - elapsed
             if remaining > 0:
@@ -77,10 +83,10 @@ class Controller:
 
         has_bounced = self.ball.move(self.game_tick_time)
 
-        if self.ball.position.x - self.ball.radius < 0:
+        if self.ball.position.x < 0:
             self.right_score += 1
             self.ball = self.create_ball(going_right=False)
-        elif self.ball.position.x + self.ball.radius > 1:
+        elif self.ball.position.x > 1:
             self.left_score += 1
             self.ball = self.create_ball(going_right=True)
 
@@ -111,9 +117,9 @@ class Controller:
 
     def create_ball(self, going_right: bool):
         return Ball(
-            position=Position2D(0.5, 0.5),
-            speed=Speed2D(0.5, 0.288) if going_right else Speed2D(-0.5, 0.288),
-            radius=0.1,
+            position=Position2D(INITIAL_POSITION_X, INITIAL_POSITION_Y),
+            speed=Speed2D(INITIAL_SPEED_X, INITIAL_SPEED_Y) if going_right else Speed2D(-INITIAL_SPEED_X, INITIAL_SPEED_Y),
+            radius=BALL_RADIUS,
             paddle_left=self.paddle_left,
             paddle_right=self.paddle_right
         )
