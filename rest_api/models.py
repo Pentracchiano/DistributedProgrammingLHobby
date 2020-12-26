@@ -51,7 +51,7 @@ class CompletedMatch(models.Model):
 
 
 # todo implementare una funzione di elo
-def calculate_elos(winner: User, loser: User, winner_score: int, loser_score: int) -> typing.Tuple[int, int]:
+def compute_elos(winner: User, loser: User, winner_score: int, loser_score: int) -> typing.Tuple[int, int]:
     value = 50
     new_winner_elo = winner.elo + value
     new_loser_elo = loser.elo - value
@@ -118,6 +118,18 @@ class OngoingMatch(models.Model):
         value.role = User.Role.SPECTATOR
         value.save(update_fields=['role', 'ongoing_match'])
 
+    def remove_spectator(self, value: User):
+        if not value.ongoing_match:
+            raise ValueError(f'User {value.username} is not in a match')
+        if value.ongoing_match.pk != self.pk:
+            raise ValueError(f'User {value.username} is not in match {self.pk}, but {value.ongoing_match.pk}')
+        if value.role != User.Role.SPECTATOR:
+            raise ValueError(f'User {value.username} is not a spectator of this match')
+
+        value.role = None
+        value.ongoing_match = None
+        value.save(update_fields=['role', 'ongoing_match'])
+
     def start_match(self):
         self.start_timestamp = timezone.now()
         self.is_started = True
@@ -134,7 +146,7 @@ class OngoingMatch(models.Model):
         if (winner not in users) or (loser not in users):
             raise ValueError('User not playing the game')
 
-        new_winner_elo, new_loser_elo = calculate_elos(winner, loser, winner_score, loser_score)
+        new_winner_elo, new_loser_elo = compute_elos(winner, loser, winner_score, loser_score)
 
         with transaction.atomic():
             completed_match = CompletedMatch.objects.create(

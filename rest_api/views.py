@@ -19,6 +19,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['elo', 'username']
 
+    # todo mettere ?user in ongoing?
     @action(detail=True)
     def ongoing_match(self, request, **kwargs):
         user = self.get_object()

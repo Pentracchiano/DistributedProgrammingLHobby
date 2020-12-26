@@ -16,8 +16,8 @@ class Controller:
             width=PADDLE_WIDTH,
             height=PADDLE_HEIGHT,
             acceleration=0.1,
-            acceleration_fast_factor=3,
-            braking_factor=1.5
+            acceleration_fast_factor=2,
+            braking_factor=1.1
         )
         self.paddle_right = Paddle(
             position=Position2D(1-PADDLE_WIDTH/2, 0.5),
@@ -25,8 +25,8 @@ class Controller:
             width=PADDLE_WIDTH,
             height=PADDLE_HEIGHT,
             acceleration=0.1,
-            acceleration_fast_factor=3,
-            braking_factor=1.5
+            acceleration_fast_factor=2,
+            braking_factor=1.1
         )
         self.ball = self.create_ball(going_right=True)
 

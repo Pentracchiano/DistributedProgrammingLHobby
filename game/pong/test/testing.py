@@ -7,6 +7,7 @@ from game.pong.paddle import PaddleCommand
 import time
 
 if __name__ == '__main__':
+    #todo crearne uno simile ma con websocket
     input = Input()
     output = PygameOutput(1280, 720)
     controller = Controller(input, output)
