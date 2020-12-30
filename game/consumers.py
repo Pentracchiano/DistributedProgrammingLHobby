@@ -32,6 +32,7 @@ class GameConsumer(JsonWebsocketConsumer):
     }
 
     def connect(self):
+        self.accept()
         try:
             self.match_id = int(self.scope['url_route']['kwargs']['match_id'])
         except ValueError:
@@ -42,7 +43,8 @@ class GameConsumer(JsonWebsocketConsumer):
         self.user = self.scope['user']
 
         if not self.user.is_authenticated:
-            self.close(401)
+            print("ciao")
+            self.close(4001)
             return
 
         # Check requested role in url query string
@@ -95,9 +97,12 @@ class GameConsumer(JsonWebsocketConsumer):
                 self.channel_name
             )
 
-            self.accept()
 
     def disconnect(self, close_code):
+        print(close_code)
+        if close_code == 1006:
+            return
+
         # The players remain in the game until the end of the game
         if self.role == 'spectator':
             self.match.remove_spectator(self.user)

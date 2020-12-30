@@ -1,15 +1,37 @@
-from game.pong.test.output import PygameOutput
-from game.pong.test.input import Input
-from game.pong.controller import Controller
+try:
+    import thread
+except ImportError:
+    import _thread as thread
+
 import pygame
 import sys
 from game.pong.paddle import PaddleCommand
 import time
+import websocket
+
+
+def on_message(ws, message):
+    print(message)
+
+
+def on_error(ws, error):
+    print(error)
+
+
+def on_close(ws):
+    print("### closed ###")
+
 
 if __name__ == '__main__':
-    input = Input()
-    output = PygameOutput(1280, 720)
-    controller = Controller(input, output)
+
+    match_id = int(input("Insert match id: "))
+    role = input("Insert desired role: ")
+
+    socket = websocket.WebSocketApp(f'ws://localhost:8000/ws/game/{match_id}/?role={role}',
+                                    on_message=on_message, on_error=on_error, on_close=on_close)
+
+    socket.run_forever()
+
     while True:
 
         for event in pygame.event.get():
