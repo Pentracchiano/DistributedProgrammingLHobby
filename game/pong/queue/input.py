@@ -26,6 +26,6 @@ class QueueInput:
     @staticmethod
     def _consume_input(queue: deque):
         try:
-            return queue.pop()
+            return queue.popleft()
         except IndexError:
             return PaddleCommand.NO_INPUT

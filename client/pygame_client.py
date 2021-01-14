@@ -8,6 +8,7 @@ import sys
 from game.pong.paddle import PaddleCommand
 import time
 import websocket
+import json
 
 
 def on_message(ws, message):
@@ -15,25 +16,34 @@ def on_message(ws, message):
 
 
 def on_error(ws, error):
-    print(error)
+    print(error.status_code)
+    print(error.resp_headers)
+    print(type(error))
 
 
 def on_close(ws):
     print("### closed ###")
 
 
+def on_open(ws):
+    ws.send(json.dumps({'command': 'ready'}))
+    ws.send(json.dumps({'command': 'start_match'}))
+
+
 if __name__ == '__main__':
 
     match_id = int(input("Insert match id: "))
     role = input("Insert desired role: ")
+    token = input("Insert token: ")
 
     socket = websocket.WebSocketApp(f'ws://localhost:8000/ws/game/{match_id}/?role={role}',
-                                    on_message=on_message, on_error=on_error, on_close=on_close)
+                                    on_message=on_message, on_error=on_error, on_close=on_close,
+                                    header={"Authorization": f"Token {token}"},
+                                    on_open=on_open)
 
     socket.run_forever()
 
     while True:
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()

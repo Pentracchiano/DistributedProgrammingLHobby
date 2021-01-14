@@ -24,5 +24,5 @@ class TokenAuthMiddleware:
         if b'authorization' in headers:
             token_name, token_key = headers[b'authorization'].decode().split()
             if token_name == 'Token':
-                scope['user'] = get_user(token_key)
+                scope['user'] = await get_user(token_key)
         return await self.inner(scope, receive, send)

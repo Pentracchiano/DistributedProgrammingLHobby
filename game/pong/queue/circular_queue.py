@@ -1,5 +1,5 @@
 import threading
-from queue import Queue, Full
+from collections import deque
 
 
 class CircularQueue:
@@ -7,17 +7,16 @@ class CircularQueue:
     Utility class for replacing old elements when the queue is full. Thread-safe.
     """
     def __init__(self, max_size: int):
-        self.queue = Queue(max_size)
-        self.lock = threading.Lock()
+        self.queue = deque(maxlen=max_size)
+        self.lock = threading.Condition()
 
     def get(self):
         with self.lock:
-            return self.queue.get()
+            while len(self.queue) < 1:
+                self.lock.wait()
+            return self.queue.popleft()
 
     def put_nowait(self, item):
         with self.lock:
-            try:
-                self.queue.put_nowait(item)
-            except Full:
-                self.queue.get_nowait()
-                self.queue.put_nowait(item)
+            self.queue.append(item)
+            self.lock.notify()

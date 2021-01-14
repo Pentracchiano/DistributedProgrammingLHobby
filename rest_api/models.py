@@ -130,6 +130,20 @@ class OngoingMatch(models.Model):
         value.ongoing_match = None
         value.save(update_fields=['role', 'ongoing_match'])
 
+    def remove_challenger(self):
+        challenger = self.challenger
+        if not challenger:
+            raise ValueError('Challenger not present')
+        if self.is_started:
+            raise ValueError('Match already started')
+
+        self.is_challenger_ready = False
+        challenger.ongoing_match = None
+        challenger.role = None
+        with transaction.atomic():
+            self.save(update_fields=['is_challenger_ready'])
+            challenger.save(update_fields=['role', 'ongoing_match'])
+
     def start_match(self):
         self.start_timestamp = timezone.now()
         self.is_started = True

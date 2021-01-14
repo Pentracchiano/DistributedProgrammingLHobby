@@ -32,7 +32,6 @@ class GameConsumer(JsonWebsocketConsumer):
     }
 
     def connect(self):
-        self.accept()
         try:
             self.match_id = int(self.scope['url_route']['kwargs']['match_id'])
         except ValueError:
@@ -43,7 +42,6 @@ class GameConsumer(JsonWebsocketConsumer):
         self.user = self.scope['user']
 
         if not self.user.is_authenticated:
-            print("ciao")
             self.close(4001)
             return
 
@@ -96,16 +94,16 @@ class GameConsumer(JsonWebsocketConsumer):
                 self.match_group_name,
                 self.channel_name
             )
-
+        self.accept()
 
     def disconnect(self, close_code):
-        print(close_code)
-        if close_code == 1006:
-            return
+        if hasattr(self, 'role'):  # if a role has been created - that is, the consumer has at least came to set the user
+            # The players remain in the game until the end of the game
+            if self.role == 'spectator':
+                self.match.remove_spectator(self.user)
 
-        # The players remain in the game until the end of the game
-        if self.role == 'spectator':
-            self.match.remove_spectator(self.user)
+            if self.role == 'challenger' and not self.match.is_started:
+                self.match.remove_challenger()
 
         # Leave room group
         async_to_sync(self.channel_layer.group_discard)(
@@ -114,6 +112,7 @@ class GameConsumer(JsonWebsocketConsumer):
         )
 
     def receive_json(self, content, **kwargs):
+        print(content)
         if self.role == 'spectator':
             return
 
@@ -146,6 +145,7 @@ class GameConsumer(JsonWebsocketConsumer):
                     self.match.set_challenger_ready()
                 else:
                     self.send_json({'error': 'invalid command', 'code': GameConsumer.INVALID_COMMAND})
+            return
 
         # match started
         elif command not in ('up', 'down', 'fup', 'fdown'):
