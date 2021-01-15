@@ -113,6 +113,7 @@ class GameConsumer(JsonWebsocketConsumer):
             )
 
     def receive_json(self, content, **kwargs):
+        self.match.refresh_from_db()
         if self.role == 'spectator':
             return
 
@@ -136,7 +137,7 @@ class GameConsumer(JsonWebsocketConsumer):
 
                         games_to_input_handler[self.match.pk] = game_input
                     except IntegrityError:
-                        self.match.refresh_from_db()
+
                         self.send_json({'error': 'challenger not ready', 'code': GameConsumer.CHALLENGER_NOT_READY})
                 else:
                     self.send_json({'error': 'invalid command', 'code': GameConsumer.INVALID_COMMAND})
