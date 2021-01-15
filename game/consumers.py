@@ -35,7 +35,7 @@ class GameConsumer(JsonWebsocketConsumer):
         try:
             self.match_id = int(self.scope['url_route']['kwargs']['match_id'])
         except ValueError:
-            self.close(400)
+            self.close(4000)
             return
 
         # Authentication
@@ -53,23 +53,23 @@ class GameConsumer(JsonWebsocketConsumer):
                                                max_num_fields=1
                                                )
         except ValueError:
-            self.close(400)
+            self.close(4000)
             return
 
         try:
             requested_role = query_data[b'role'][0].decode('utf-8')
         except (KeyError, IndexError, UnicodeError):
-            self.close(400)
+            self.close(4000)
             return
 
         if requested_role not in ('spectator', 'host', 'challenger'):
-            self.close(400)
+            self.close(4000)
             return
 
         try:
             self.match = OngoingMatch.objects.get(pk=self.match_id)
         except OngoingMatch.DoesNotExist:
-            self.close(404)
+            self.close(4004)
             return
 
         with transaction.atomic():
@@ -78,12 +78,12 @@ class GameConsumer(JsonWebsocketConsumer):
                     self.match.add_spectator(self.user)
                 elif requested_role == 'host':
                     if self.user.pk != self.match.host.pk:
-                        self.close(403)
+                        self.close(4003)
                         return
                 elif requested_role == 'challenger':
                     self.match.challenger = self.user
             except ValueError:
-                self.close(400)
+                self.close(4000)
                 return
 
             self.role = requested_role
@@ -113,7 +113,6 @@ class GameConsumer(JsonWebsocketConsumer):
             )
 
     def receive_json(self, content, **kwargs):
-        print(content)
         if self.role == 'spectator':
             return
 
@@ -137,6 +136,7 @@ class GameConsumer(JsonWebsocketConsumer):
 
                         games_to_input_handler[self.match.pk] = game_input
                     except IntegrityError:
+                        self.match.refresh_from_db()
                         self.send_json({'error': 'challenger not ready', 'code': GameConsumer.CHALLENGER_NOT_READY})
                 else:
                     self.send_json({'error': 'invalid command', 'code': GameConsumer.INVALID_COMMAND})
@@ -164,7 +164,7 @@ class GameConsumer(JsonWebsocketConsumer):
 
     def end_game(self, message):
         self.send_json(message)
-        self.close(200)
+        self.close(1000)
 
 
 

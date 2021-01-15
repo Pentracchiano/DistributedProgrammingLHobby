@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.core import exceptions
 from rest_framework import serializers
 from rest_api.models import *
@@ -22,6 +23,10 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
 
         return super(UserSerializer, self).validate(data)
+
+    def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
+        return User.objects.create(**validated_data)
 
     class Meta:
         model = User
