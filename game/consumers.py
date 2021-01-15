@@ -106,10 +106,11 @@ class GameConsumer(JsonWebsocketConsumer):
                 self.match.remove_challenger()
 
         # Leave room group
-        async_to_sync(self.channel_layer.group_discard)(
-            self.match_group_name,
-            self.channel_name
-        )
+        if hasattr(self, 'match_group_name'):
+            async_to_sync(self.channel_layer.group_discard)(
+                self.match_group_name,
+                self.channel_name
+            )
 
     def receive_json(self, content, **kwargs):
         print(content)

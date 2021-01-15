@@ -131,6 +131,7 @@ class OngoingMatch(models.Model):
         value.save(update_fields=['role', 'ongoing_match'])
 
     def remove_challenger(self):
+        # todo not thread safe: add a select for update for locking the rows?
         challenger = self.challenger
         if not challenger:
             raise ValueError('Challenger not present')

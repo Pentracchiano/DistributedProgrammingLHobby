@@ -20,8 +20,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DistributedProgrammingLHobby.se
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": TokenAuthMiddleware(
+        AuthMiddlewareStack(
             URLRouter(
                 game.routing.websocket_urlpatterns
             )
-        ),
+        )),
 })
