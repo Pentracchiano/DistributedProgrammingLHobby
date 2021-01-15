@@ -40,6 +40,8 @@ class Controller:
         self.match_time = 0
         self.MAX_MATCH_TIME = 5 * 60
 
+        # todo a spectator doesn't know these information if connected after this message, we can put it in REST if we plan to make the parameters configurable.
+        # we're now assuming that the parameters are const
         self.output.init({
             "ball_radius": BALL_RADIUS,
             "paddle_height": PADDLE_HEIGHT,
