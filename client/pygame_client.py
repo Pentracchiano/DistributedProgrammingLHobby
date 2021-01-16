@@ -1,17 +1,92 @@
 import pygame
 import sys
-from game.pong.paddle import PaddleCommand
 import time
 import websocket
 import json
 import threading
 import queue
+import requests
+import PyInquirer
+from enum import IntEnum
+
+
+class Questions(IntEnum):
+    LOGIN = 0
+    USERNAME = 1
+    PASSWORD = 2
+    CREATE_USERNAME = 3
+    CREATE_PASSWORD = 4
+    ROLE = 5
+    WIDTH = 6
+    HEIGHT = 7
+
+
+def validate_integer(value):
+    try:
+        int(value)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+questions = [
+    {
+        'type': 'list',
+        'name': Questions.LOGIN.name,
+        'message': 'Do you want to sign-in or sign-up?',
+        'choices': ['Sign in', 'Sign up'],
+    },
+    {
+        'type': 'input',
+        'name': Questions.USERNAME.name,
+        'message': 'Enter your username:',
+    },
+    {
+        'type': 'password',
+        'name': Questions.PASSWORD.name,
+        'message': 'Enter your password:',
+    },
+    {
+        'type': 'input',
+        'name': Questions.CREATE_USERNAME.name,
+        'message': 'Create an username:',
+    },
+    {
+        'type': 'password',
+        'name': Questions.CREATE_PASSWORD.name,
+        'message': 'Create your password:',
+    },
+    {
+        'type': 'list',
+        'name': Questions.ROLE.name,
+        'message': 'What do you want to be? Choose your role:',
+        'choices': ['host', 'challenger', 'spectator'],
+    },
+    {
+        'type': 'input',
+        'name': Questions.WIDTH.name,
+        'message': 'Choose screen width:',
+        'validate': validate_integer,
+        'filter': int
+    },
+    {
+        'type': 'input',
+        'name': Questions.HEIGHT.name,
+        'message': 'Choose screen height:',
+        'validate': validate_integer,
+        'filter': int
+    },
+]
+
 
 BALL_RADIUS = 0.02
 PADDLE_HEIGHT = 0.13
 PADDLE_WIDTH = 0.02
 BLACK = 0, 0, 0
 WHITE = 255, 255, 255
+
+API_ENDPOINT = 'http://127.0.0.1:8000/api/'
 
 is_match_started = False
 is_match_completed = False
@@ -126,30 +201,111 @@ def output_consumer(ws):
         ws.send(output_queue.get())
 
 
-if __name__ == '__main__':
-    user = int(input("Select user: "))
-    match_id = int(input("Insert match id: "))
-    # width = int(input("Insert game window width: "))
-    # height = int(input("Insert game window height: "))
-    # role = input("Insert desired role: ")
-    # token = input("Insert token: ")
-    if user == 1:
-        width = 1280
-        height = 720
-        role = 'challenger'
-        token = '003d06d98879ee10bf1c45040003c90fc5b53c47'
-    elif user == 2:
-        width = 800
-        height = 600
-        role = 'host'
-        token = 'da76aaf23ab38f59aaa6337cdb82ed3b25f0bbb4'
-    else:
-        width = 640
-        height = 320
-        role = 'spectator'
-        token = '06c033109641ce67f16a422661323d93c8f858cd'
+def login():
+    answers = PyInquirer.prompt(questions[Questions.LOGIN])
 
-    size = width, height
+    if answers[Questions.LOGIN.name] == 'Sign in':
+        q_user = Questions.USERNAME
+        q_pw = Questions.PASSWORD
+        url = API_ENDPOINT + 'token/'
+
+    else:
+        q_user = Questions.CREATE_USERNAME
+        q_pw = Questions.CREATE_PASSWORD
+        url = API_ENDPOINT + 'users/sign_up/'
+
+    answers.update(PyInquirer.prompt([questions[q_user], questions[q_pw]]))
+    data = {
+        'username': answers[q_user.name],
+        'password': answers[q_pw.name]
+    }
+    res = requests.post(url=url, data=data)
+    res_dict = res.json()
+    if res.status_code != requests.codes.ok and res.status_code != requests.codes.created:
+        for key in res_dict.keys():
+            for value in res_dict[key]:
+                print('Error: ' + value)
+        sys.exit(0)
+
+    try:
+        return res_dict["token"]
+    except KeyError:
+        url = API_ENDPOINT + 'token/'
+        res = requests.post(url=url, data=data)
+        res_dict = res.json()
+        return res_dict["token"]
+
+
+def choose_role():
+    answer = PyInquirer.prompt(questions[Questions.ROLE])
+    return answer[Questions.ROLE.name]
+
+
+def get_match_id(user_session, user_role):
+    url = API_ENDPOINT + 'ongoing_matches/'
+    if user_role == 'host':
+        res = user_session.post(url=url)
+        if res.status_code != requests.codes.created:
+            print(res.text)
+            sys.exit(0)
+        else:
+            return res.json()['id']
+
+    else:
+        if user_role == 'challenger':
+            params = {'is_full': False}
+            message = 'Choose a match. Only matches waiting for challengers are displayed:'
+        else:
+            params = None
+            message = 'Choose a match to spectate:'
+        q_name = 'ongoing_match'
+        res = user_session.get(url=url, params=params)
+        matches = res.json()
+        choices = []
+
+        for match in matches:
+            challenger = match['challenger']
+            if challenger:
+                challenger_string = f"Challenger {match['challenger']['username']} ({match['challenger']['elo']})"
+            else:
+                challenger_string = "Waiting for challenger"
+            choices.append({
+                'name': f"Host: {match['host']['username']} ({match['host']['elo']}) - "
+                        f"{challenger_string} - "
+                        f"Number of spectators: {len(match['spectators'])} - "
+                        f"{'Started' if match['is_started'] else 'Not started'}",
+                'value': match['id']
+            })
+
+        if len(choices) == 0:
+            print("No matches available at this moment, maybe you can try to host a match.")
+            sys.exit(0)
+
+        question = {
+            'type': 'list',
+            'name': q_name,
+            'message': message,
+            'choices': choices,
+            'pageSize': 10
+        }
+
+        answer = PyInquirer.prompt(question)
+
+    return answer[q_name]
+
+
+if __name__ == '__main__':
+    token = login()
+    session = requests.Session()
+    session.headers.update({"Authorization": f"Token {token}"})
+
+    role = choose_role()
+    match_id = get_match_id(session, role)
+
+    answers = PyInquirer.prompt([questions[Questions.WIDTH], questions[Questions.HEIGHT]])
+
+    size = answers[Questions.WIDTH.name], answers[Questions.HEIGHT.name]
+
     socket = websocket.WebSocketApp(f'ws://localhost:8000/ws/game/{match_id}/?role={role}',
                                     on_message=on_message, on_error=on_error, on_close=on_close,
                                     header={"Authorization": f"Token {token}"},
