@@ -20,9 +20,10 @@ class GameConsumer(JsonWebsocketConsumer):
     INVALID_COMMAND = 0
     NO_COMMAND = 1
     CHALLENGER_NOT_READY = 2
+    MATCH_ENDED = 3
 
     MAX_INPUT_QUEUE_SIZE = 10
-    MAX_OUTPUT_QUEUE_SIZE = 10
+    MAX_OUTPUT_QUEUE_SIZE = 1
 
     COMMANDS = {
         'up': PaddleCommand.UP,
@@ -113,7 +114,12 @@ class GameConsumer(JsonWebsocketConsumer):
             )
 
     def receive_json(self, content, **kwargs):
-        self.match.refresh_from_db()
+        try:
+            self.match.refresh_from_db()
+        except OngoingMatch.DoesNotExist:
+            self.send_json({'error': 'match ended, stop sending commands', 'code': GameConsumer.MATCH_ENDED})
+            return
+
         if self.role == 'spectator':
             return
 

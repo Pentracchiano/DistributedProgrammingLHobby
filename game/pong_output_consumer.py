@@ -42,7 +42,8 @@ class PongOutputConsumer:
 
                 completed_match = self.match.complete_match(winner, loser, winner_score, loser_score)
                 serializer = CompletedMatchSerializer(instance=completed_match)
-                end_message_with_type = {'type': 'end_game'}
+                # propagating message_type because here i am sending serializer.data and not message.
+                end_message_with_type = {'type': 'end_game', 'message_type': QueueOutput.END}
                 end_message_with_type.update(serializer.data)
 
                 async_to_sync(self.channel_layer.group_send)(self.group_name, end_message_with_type)

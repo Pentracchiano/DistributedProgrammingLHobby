@@ -32,7 +32,7 @@ class Paddle:
         elif command == PaddleCommand.FAST_DOWN:
             self.speed += self.acceleration * self.acceleration_fast_factor
         elif command == PaddleCommand.NO_INPUT:
-            self.speed /= self.braking_factor
+            self.speed = 0
 
         self.position.y += self.speed * delta_t
 

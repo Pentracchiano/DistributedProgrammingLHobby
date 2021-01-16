@@ -91,16 +91,20 @@ API_ENDPOINT = 'http://127.0.0.1:8000/api/'
 is_match_started = False
 is_match_completed = False
 is_socket_open = False
+is_socket_closed = False
 game_status_queue = queue.Queue()
 output_queue = queue.Queue()
 
 lock = threading.Condition()
 
 
-def graphics_handler(ws):
+def graphics_handler(ws, size):
     with lock:
-        while not is_socket_open:
+        while not (is_socket_open or is_socket_closed):
             lock.wait()
+
+    if is_socket_closed:
+        return
 
     if role == 'host':
         with lock:
@@ -116,12 +120,14 @@ def graphics_handler(ws):
                 ws.send(json.dumps({'command': 'ready'}))
                 lock.wait()
 
+    pygame.init()
+    pygame.display.set_mode(size)
     while not is_match_completed:
         start = time.perf_counter()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()
+                sys.exit(0)
 
         if role != 'spectator':
             keys_pressed = pygame.key.get_pressed()
@@ -160,6 +166,9 @@ def graphics_handler(ws):
         remaining = 0.01 - elapsed
         time.sleep(remaining if remaining > 0 else 0)
 
+    pygame.quit()
+    sys.exit(0)
+
 
 def on_message(ws, message):
     global is_match_started, is_match_completed
@@ -174,19 +183,22 @@ def on_message(ws, message):
             game_status_queue.put(message)
         elif message.get('message_type') == 'end':
             is_match_completed = True
-            print(message)
-            pygame.quit()
-            sys.exit(0)
+            print(message)  # todo better printing for endgame
+            ws.close()
+        else:
+            print(f'Unexpected message: {message}')
 
 
 def on_error(ws, error):
-    print(error.status_code)
-    print(error.resp_headers)
-    print(type(error))
+    print(error)
 
 
 def on_close(ws):
-    print("closed")
+    global is_socket_closed
+    print("Socket closing.")
+    with lock:
+        is_socket_closed = True
+        lock.notify()
 
 
 def on_open(ws):
@@ -198,7 +210,9 @@ def on_open(ws):
 
 def output_consumer(ws):
     while not is_match_completed:
-        ws.send(output_queue.get())
+        message = output_queue.get()
+        if ws.sock:
+            ws.send(message)
 
 
 def login():
@@ -311,9 +325,7 @@ if __name__ == '__main__':
                                     header={"Authorization": f"Token {token}"},
                                     on_open=on_open)
 
-    pygame.init()
-    pygame.display.set_mode(size)
-    threading.Thread(target=socket.run_forever).start()
+    threading.Thread(target=socket.run_forever, daemon=True).start()
     if role != 'spectator':
-        threading.Thread(target=output_consumer, args=(socket, )).start()
-    graphics_handler(socket)
+        threading.Thread(target=output_consumer, args=(socket, ), daemon=True).start()
+    graphics_handler(socket, size)
