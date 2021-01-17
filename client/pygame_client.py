@@ -10,6 +10,7 @@ import queue
 import requests
 import PyInquirer
 from enum import IntEnum
+import pathlib
 
 
 class Questions(IntEnum):
@@ -87,7 +88,8 @@ PADDLE_HEIGHT = 0.13
 PADDLE_WIDTH = 0.02
 BLACK = 0, 0, 0
 WHITE = 255, 255, 255
-FONT_NAME = 'retro.ttf'
+PLAYER_PADDLE_COLOR = 255, 157, 0
+FONT_NAME = str((pathlib.Path(__file__).parent / 'retro.ttf').resolve())
 
 
 API_ENDPOINT = 'http://localhost:8000/api/'
@@ -113,6 +115,9 @@ def draw_text(surface, text, font_size, x, y):
 
 
 def graphics_handler(ws, size):
+    left_color = WHITE
+    right_color = WHITE
+
     with lock:
         while not (is_socket_open or is_socket_closed):
             lock.wait()
@@ -121,6 +126,7 @@ def graphics_handler(ws, size):
         return
 
     if role == 'host':
+        left_color = PLAYER_PADDLE_COLOR
         with lock:
             while not is_match_started:
                 input("Press ENTER to start the match")
@@ -128,6 +134,7 @@ def graphics_handler(ws, size):
                 lock.wait()
 
     elif role == 'challenger':
+        right_color = PLAYER_PADDLE_COLOR
         with lock:
             if not is_match_started:
                 input("Ready to play? Press ENTER")
@@ -139,7 +146,6 @@ def graphics_handler(ws, size):
     center_line = pygame.Surface((size[0]/100, size[1]/10))
     center_line.set_alpha(120)
     center_line.fill(WHITE)
-
 
     while not is_match_completed:
         start = time.perf_counter()
@@ -180,10 +186,10 @@ def graphics_handler(ws, size):
             pygame.draw.circle(screen, WHITE, (message["ball_x"] * size[0],
                                                message["ball_y"] * size[1]), BALL_RADIUS * size[0])
 
-            pygame.draw.rect(screen, WHITE,
+            pygame.draw.rect(screen, left_color,
                              pygame.rect.Rect(0, message["left_paddle_y"] * size[1] - PADDLE_HEIGHT / 2 * size[1],
                                               PADDLE_WIDTH * size[0], PADDLE_HEIGHT * size[1]))
-            pygame.draw.rect(screen, WHITE,
+            pygame.draw.rect(screen, right_color,
                              pygame.rect.Rect(size[0] - PADDLE_WIDTH * size[0],
                                               message["right_paddle_y"] * size[1] - PADDLE_HEIGHT / 2 * size[1],
                                               PADDLE_WIDTH * size[0], PADDLE_HEIGHT * size[1]))
