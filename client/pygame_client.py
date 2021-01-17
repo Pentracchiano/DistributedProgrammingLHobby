@@ -1,4 +1,5 @@
 import os
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import sys
@@ -82,7 +83,6 @@ questions = [
     },
 ]
 
-
 BALL_RADIUS = 0.02
 PADDLE_HEIGHT = 0.13
 PADDLE_WIDTH = 0.02
@@ -90,7 +90,6 @@ BLACK = 0, 0, 0
 WHITE = 255, 255, 255
 PLAYER_PADDLE_COLOR = 255, 157, 0
 FONT_NAME = str((pathlib.Path(__file__).parent / 'retro.ttf').resolve())
-
 
 API_ENDPOINT = 'http://localhost:8000/api/'
 WEBSOCKET_SERVER = 'ws://localhost:8000'
@@ -105,12 +104,15 @@ output_queue = queue.Queue()
 lock = threading.Condition()
 
 
-def draw_text(surface, text, font_size, x, y):
+def draw_text(surface, text, font_size, x, y, center=None):
     font = pygame.font.Font(FONT_NAME, font_size)
     text_surface = font.render(text, False, WHITE)
     text_surface.set_alpha(200)
     text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
+    if center:
+        text_rect.center = center
+    else:
+        text_rect.midtop = (x, y)
     surface.blit(text_surface, text_rect)
 
 
@@ -143,7 +145,7 @@ def graphics_handler(ws, size):
 
     pygame.init()
     pygame.display.set_mode(size)
-    center_line = pygame.Surface((size[0]/100, size[1]/10))
+    center_line = pygame.Surface((size[0] / 100, size[1] / 10))
     center_line.set_alpha(120)
     center_line.fill(WHITE)
 
@@ -174,8 +176,8 @@ def graphics_handler(ws, size):
         else:
             screen = pygame.display.get_surface()
             screen.fill(BLACK)
-            draw_text(screen, str(message["left_score"]), int(size[0]/30), 0.4 * size[0], 0.07 * size[1])
-            draw_text(screen, str(message["right_score"]), int(size[0]/30), 0.6 * size[0], 0.07 * size[1])
+            draw_text(screen, str(message["left_score"]), int(size[0] / 30), 0.4 * size[0], 0.07 * size[1])
+            draw_text(screen, str(message["right_score"]), int(size[0] / 30), 0.6 * size[0], 0.07 * size[1])
 
             screen.blit(center_line, (0.5 * size[0] - size[0] / 200, 0.05 * size[1]))
             screen.blit(center_line, (0.5 * size[0] - size[0] / 200, 0.25 * size[1]))
@@ -194,21 +196,40 @@ def graphics_handler(ws, size):
                                               message["right_paddle_y"] * size[1] - PADDLE_HEIGHT / 2 * size[1],
                                               PADDLE_WIDTH * size[0], PADDLE_HEIGHT * size[1]))
             pygame.display.flip()
+
         pygame.event.pump()
         end = time.perf_counter()
         elapsed = end - start
         remaining = 0.01 - elapsed
         time.sleep(remaining if remaining > 0 else 0)
 
-    pygame.quit()
-    sys.exit(0)
+    try:
+        end_message = game_status_queue.get_nowait()
+    except queue.Empty:
+        pygame.quit()
+        sys.exit(0)
+
+    winner = f"{end_message['winner']} won"
+    screen = pygame.display.get_surface()
+    screen.fill(BLACK)
+
+    draw_text(screen, winner, int(size[0] / 20), 10, 10, screen.get_rect().center)
+    draw_text(screen, str(end_message["winner_score"]), int(size[0] / 30), 0.4 * size[0], 0.07 * size[1])
+    draw_text(screen, str(end_message["loser_score"]), int(size[0] / 30), 0.6 * size[0], 0.07 * size[1])
+
+    pygame.display.flip()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit(0)
 
 
 def on_message(ws, message):
     global is_match_started, is_match_completed
     message = json.loads(message)
     if role in ['host', 'challenger'] and not is_match_started:
-        print(message)
         with lock:
             is_match_started = message.get('message_type') == 'init'
             lock.notify()
@@ -217,10 +238,15 @@ def on_message(ws, message):
             game_status_queue.put(message)
         elif message.get('message_type') == 'end':
             is_match_completed = True
-            print(message)  # todo better printing for endgame
+            game_status_queue.put(message)
             ws.close()
         else:
-            print(f'Unexpected message: {message}')
+            try:
+                if message['code'] == 3:
+                    is_match_completed = True
+                    ws.close()
+            except KeyError:
+                print(f'Unexpected message: {message}')
 
 
 def on_error(ws, error):
@@ -361,5 +387,5 @@ if __name__ == '__main__':
 
     threading.Thread(target=socket.run_forever, daemon=True).start()
     if role != 'spectator':
-        threading.Thread(target=output_consumer, args=(socket, ), daemon=True).start()
+        threading.Thread(target=output_consumer, args=(socket,), daemon=True).start()
     graphics_handler(socket, size)
