@@ -228,6 +228,7 @@ def on_message(ws, message):
     global is_match_started, is_match_completed
     message = json.loads(message)
     if role in ['host', 'challenger'] and not is_match_started:
+        print(message)
         with lock:
             is_match_started = message.get('message_type') == 'init'
             lock.notify()
@@ -235,6 +236,7 @@ def on_message(ws, message):
         if message.get('message_type') == 'status':
             game_status_queue.put(message)
         elif message.get('message_type') == 'end':
+            print(message)
             is_match_completed = True
             end_game_info.update(message)
             ws.close()

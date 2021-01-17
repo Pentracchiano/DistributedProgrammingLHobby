@@ -98,13 +98,18 @@ class GameConsumer(JsonWebsocketConsumer):
         self.accept()
 
     def disconnect(self, close_code):
-        if hasattr(self, 'role'):  # if a role has been created - that is, the consumer has at least came to set the user
-            # The players remain in the game until the end of the game
-            if self.role == 'spectator':
-                self.match.remove_spectator(self.user)
+        try:
+            self.match.refresh_from_db()
+        except OngoingMatch.DoesNotExist:
+            pass
+        else:
+            if hasattr(self, 'role'):  # if a role has been created - that is, the consumer has at least came to set the user
+                # The players remain in the game until the end of the game
+                if self.role == 'spectator':
+                    self.match.remove_spectator(self.user)
 
-            if self.role == 'challenger' and not self.match.is_started:
-                self.match.remove_challenger()
+                if self.role == 'challenger' and not self.match.is_started:
+                    self.match.remove_challenger()
 
         # Leave room group
         if hasattr(self, 'match_group_name'):
