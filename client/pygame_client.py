@@ -99,6 +99,7 @@ is_match_completed = False
 is_socket_open = False
 is_socket_closed = False
 game_status_queue = queue.Queue()
+end_game_info = {}
 output_queue = queue.Queue()
 
 lock = threading.Condition()
@@ -203,11 +204,7 @@ def graphics_handler(ws, size):
         remaining = 0.01 - elapsed
         time.sleep(remaining if remaining > 0 else 0)
 
-    try:
-        end_message = game_status_queue.get_nowait()
-    except queue.Empty:
-        pygame.quit()
-        sys.exit(0)
+    end_message = end_game_info
 
     winner = f"{end_message['winner']} won"
     screen = pygame.display.get_surface()
@@ -224,6 +221,7 @@ def graphics_handler(ws, size):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
+        time.sleep(0.05)
 
 
 def on_message(ws, message):
@@ -238,15 +236,10 @@ def on_message(ws, message):
             game_status_queue.put(message)
         elif message.get('message_type') == 'end':
             is_match_completed = True
-            game_status_queue.put(message)
+            end_game_info.update(message)
             ws.close()
         else:
-            try:
-                if message['code'] == 3:
-                    is_match_completed = True
-                    ws.close()
-            except KeyError:
-                print(f'Unexpected message: {message}')
+            print(f'Unexpected message: {message}')
 
 
 def on_error(ws, error):
