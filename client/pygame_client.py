@@ -1,3 +1,5 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import sys
 import time
@@ -88,7 +90,8 @@ WHITE = 255, 255, 255
 FONT_NAME = 'retro.ttf'
 
 
-API_ENDPOINT = 'http://127.0.0.1:8000/api/'
+API_ENDPOINT = 'http://localhost:8000/api/'
+WEBSOCKET_SERVER = 'ws://localhost:8000'
 
 is_match_started = False
 is_match_completed = False
@@ -345,7 +348,7 @@ if __name__ == '__main__':
 
     size = answers[Questions.WIDTH.name], answers[Questions.HEIGHT.name]
 
-    socket = websocket.WebSocketApp(f'ws://localhost:8000/ws/game/{match_id}/?role={role}',
+    socket = websocket.WebSocketApp(f'{WEBSOCKET_SERVER}/ws/game/{match_id}/?role={role}',
                                     on_message=on_message, on_error=on_error, on_close=on_close,
                                     header={"Authorization": f"Token {token}"},
                                     on_open=on_open)
