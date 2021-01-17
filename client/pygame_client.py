@@ -85,6 +85,8 @@ PADDLE_HEIGHT = 0.13
 PADDLE_WIDTH = 0.02
 BLACK = 0, 0, 0
 WHITE = 255, 255, 255
+FONT_NAME = 'retro.ttf'
+
 
 API_ENDPOINT = 'http://127.0.0.1:8000/api/'
 
@@ -96,6 +98,15 @@ game_status_queue = queue.Queue()
 output_queue = queue.Queue()
 
 lock = threading.Condition()
+
+
+def draw_text(surface, text, font_size, x, y):
+    font = pygame.font.Font(FONT_NAME, font_size)
+    text_surface = font.render(text, False, WHITE)
+    text_surface.set_alpha(200)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surface.blit(text_surface, text_rect)
 
 
 def graphics_handler(ws, size):
@@ -122,6 +133,11 @@ def graphics_handler(ws, size):
 
     pygame.init()
     pygame.display.set_mode(size)
+    center_line = pygame.Surface((size[0]/100, size[1]/10))
+    center_line.set_alpha(120)
+    center_line.fill(WHITE)
+
+
     while not is_match_completed:
         start = time.perf_counter()
         for event in pygame.event.get():
@@ -149,6 +165,15 @@ def graphics_handler(ws, size):
         else:
             screen = pygame.display.get_surface()
             screen.fill(BLACK)
+            draw_text(screen, str(message["left_score"]), int(size[0]/30), 0.4 * size[0], 0.07 * size[1])
+            draw_text(screen, str(message["right_score"]), int(size[0]/30), 0.6 * size[0], 0.07 * size[1])
+
+            screen.blit(center_line, (0.5 * size[0] - size[0] / 200, 0.05 * size[1]))
+            screen.blit(center_line, (0.5 * size[0] - size[0] / 200, 0.25 * size[1]))
+            screen.blit(center_line, (0.5 * size[0] - size[0] / 200, 0.45 * size[1]))
+            screen.blit(center_line, (0.5 * size[0] - size[0] / 200, 0.65 * size[1]))
+            screen.blit(center_line, (0.5 * size[0] - size[0] / 200, 0.85 * size[1]))
+
             pygame.draw.circle(screen, WHITE, (message["ball_x"] * size[0],
                                                message["ball_y"] * size[1]), BALL_RADIUS * size[0])
 
