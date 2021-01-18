@@ -22,3 +22,18 @@ markdown_extensions:
         - pymdownx.inlinehilite
         - pymdownx.tabbed
         - footnotes
+        - attr_list
+
+nav:
+        - Introduction:
+                  - LHobby: 'introduction/index.md'
+                  - Installation: 'introduction/installation.md'
+                  - Usage: 'introduction/usage.md'
+        - 'External dependencies': 'external dependencies/index.md'
+        - Architecture:
+                  - 'Overview': 'architecture/index.md'
+        - Interfaces:
+                  - 'REST API': 'interfaces/REST_API.md'
+                  - 'Websockets': 'interfaces/websockets.md'
+        - 'Relevant code description':
+                  - Overview: 'relevant code description/index.md'
