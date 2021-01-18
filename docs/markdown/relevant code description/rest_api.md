@@ -100,3 +100,29 @@ This is only one example of such a situation, which demonstrates the use
         return completed_match
 ```
 
+## Views
+While much of the views code is straightforward, there are interesting edge cases to take into account.
+
+### OngoingMatch creation
+When an `OngoingMatch` is created by a soon-to-be host via a `POST` request, it must also be linked to the user that started the request, in order to keep track of the ownership of the match.
+Therefore, the match instance is created, and then the user must be updated by setting the new instance as the user's current match.
+
+If the user is already in a game when making the request, or any unanticipated errors happen after having created the match, the database is left in an inconsistent state; a transaction is necessary to avoid this.
+
+```python linenums="53"
+    def create(self, request, *args, **kwargs):
+        with transaction.atomic():
+            new_ongoing_match = OngoingMatch.objects.create()
+            try:
+                new_ongoing_match.host = request.user
+            except ValueError as e:
+                raise serializers.ValidationError(str(e))
+
+        serializer = OngoingMatchSerializer(instance=new_ongoing_match)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+```
+This code structure enforces a rollback of the database operations if any errors occur, while alerting the user. Otherwise, a normal `HTTP 201` response is returned together with the new object representation in the body, respecting REST design principles.
+
+!!!success "Clean views"
+	No substantial logic is therefore executed in the views, which only *glue together* other code: the error validation is done inside the model (just as described in [the previous section](#operating-on-users-in-ongoingmatch)), the serialization of the new instance to a Python `#!python dict` is handled by the serializer, and the JSON serialization is made by the `Response` internal handlers.
+

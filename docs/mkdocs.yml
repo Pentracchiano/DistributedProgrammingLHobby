@@ -40,6 +40,6 @@ nav:
         - Interfaces:
                   - 'REST API': 'interfaces/REST_API.md'
                   - 'Websockets': 'interfaces/websockets.md'
-        - 'Relevant code description':
-                  - Overview: 'relevant code description/index.md'
+        - 'Code description and examples':
+                  - 'Project structure': 'relevant code description/index.md'
                   - 'Rest API': 'relevant code description/rest_api.md'

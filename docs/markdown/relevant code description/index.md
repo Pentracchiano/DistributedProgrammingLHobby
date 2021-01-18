@@ -1,7 +1,3 @@
-# Overview 
-
-## Project structure
-
 The code is organized in Python packages as below. 
 The highlighted packages are the most interesting packages - that is, containing
 most of the logic of the project.
@@ -58,7 +54,7 @@ most of the logic of the project.
     └── requirements.txt
     ```
 
-### Packages description
+## Packages description
 **`DistributedProgrammingLHobby`** is the Django _site_ directory, containing global settings
 for the whole **server** application. In particular, here it is defined:
 
