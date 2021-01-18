@@ -25,6 +25,8 @@ markdown_extensions:
         - pymdownx.tabbed
         - footnotes
         - attr_list
+        - toc:
+              toc_depth: 3
 
 nav:
         - Introduction:
