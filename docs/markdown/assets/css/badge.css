@@ -4,6 +4,15 @@
 .bg-indigo {
     background-color: hsla(231, 48%, 48%, 1) !important;
 }
+
+.bg-red {
+    background-color: #ff0800 !important;
+}
+
+.bg-blue {
+    background-color: dodgerblue !important;
+}
+
 .rounded-1 {
     border-radius: 4px !important;
 }
