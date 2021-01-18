@@ -5,6 +5,10 @@ repo_name: "Github: LHobby"
 
 use_directory_urls: false
 
+docs_dir: markdown
+
+extra_css: [assets/css/badge.css]
+
 theme:
         name: material
         features:
@@ -23,6 +27,8 @@ markdown_extensions:
         - pymdownx.tabbed
         - footnotes
         - attr_list
+        - toc:
+              toc_depth: 3
 
 nav:
         - Introduction:
