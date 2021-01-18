@@ -5,6 +5,8 @@ repo_name: "Github: LHobby"
 
 use_directory_urls: false
 
+docs_dir: markdown
+
 theme:
         name: material
         features:
