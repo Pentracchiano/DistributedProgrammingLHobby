@@ -43,3 +43,4 @@ nav:
                   - 'Websockets': 'interfaces/websockets.md'
         - 'Relevant code description':
                   - Overview: 'relevant code description/index.md'
+                  - 'Rest API': 'relevant code description/rest_api.md'
