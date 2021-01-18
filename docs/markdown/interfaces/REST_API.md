@@ -8,10 +8,11 @@ This section shows the list of all the resources available in the LHobby REST AP
 
 ### Users
 
-#### Creation 
+#### Creation of new users
 
-### Token
+<pre><code><span class="bg-indigo text-white rounded-1 px-2 py-1" style="text-transform: uppercase">get</span> /orgs/{org}/actions/permissions/repositories</code></pre>
 
+#### Token
 
 
 ### Ongoing matches

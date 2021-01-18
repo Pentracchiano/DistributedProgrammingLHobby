@@ -7,6 +7,8 @@ use_directory_urls: false
 
 docs_dir: markdown
 
+extra_css: [assets/css/badge.css]
+
 theme:
         name: material
         features:
