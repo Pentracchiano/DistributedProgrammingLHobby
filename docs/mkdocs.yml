@@ -1,0 +1,24 @@
+site_name: LHobby
+
+repo_url: https://github.com/manudarmi/DistributedProgrammingLHobby
+repo_name: "Github: LHobby"
+
+use_directory_urls: false
+
+theme:
+        name: material
+        features:
+                - navigation.tabs
+                - navigation.instant
+                - toc.integrate
+        icon:
+                repo: fontawesome/brands/github
+markdown_extensions:
+        - admonition
+        - pymdownx.superfences
+        - pymdownx.highlight:
+                linenums: true
+        - pymdownx.keys
+        - pymdownx.inlinehilite
+        - pymdownx.tabbed
+        - footnotes
