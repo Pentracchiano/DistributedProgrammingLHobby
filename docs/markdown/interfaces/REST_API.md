@@ -20,7 +20,7 @@ There are two ways to do an authenticated request.
 
 ### :octicons-unlock-16:{: .unlock } Cookie based login
 
-Login into the system. This endpoint is better suited for browser client.
+Login into the system. This endpoint is better suited for browser clients.
 
 <pre>
 <code><span class="bg-indigo text-white rounded-1 px-2 py-1" style="text-transform: uppercase">post</span> /HOST:PORT/api/login/</code>
@@ -32,7 +32,7 @@ Login into the system. This endpoint is better suited for browser client.
 |-|-|-|-|-| 
 |`username`| string | body | | true |
 |`password`| string | body | | true |
-|`next`| string | param | the url in which you will be redirected| false | 
+|`next`| string | param | the url you will be redirected to | false | 
 
 #### OK response
 ```
@@ -41,7 +41,7 @@ Status: 302 Found
 
 ### :octicons-lock-16:{: .lock } Cookie based logout 
 
-Logout from the system. This endpoint is better suited for browser client.
+Logout from the system. This endpoint is better suited for browser clients.
 
 <pre>
 <code><span class="bg-indigo text-white rounded-1 px-2 py-1" style="text-transform: uppercase">post</span> /HOST:PORT/api/logout/</code>
@@ -70,8 +70,8 @@ Use this endpoint to generate a token for the authentication.
 
 | Name    | Type | In | Description | Required |
 |-|-|-|-|-| 
-|`username`| string | body | the username of the user | true |
-|`password`| string | body | the password of the user | true |
+|`username`| string | body |  | true |
+|`password`| string | body |  | true |
 
 #### OK response
 
@@ -160,7 +160,7 @@ List all registered users.
 
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
-|`ordering`| string | param | if equal to one in [elo, -elo, username, -username] the user list will be ordered | false |
+|`ordering`| string | param | if equal to one in `[elo, -elo, username, -username]` the user list will be ordered | false |
 
 #### OK response
 
@@ -214,7 +214,7 @@ Get detail of specific user using his `username`.
 
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
-|`username`| string | path | user's username | true |
+|`username`| string | path |  | true |
 
 #### OK response
 
@@ -246,7 +246,7 @@ Get the ongoing match of a specific user.
 
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
-|`username`| string | path | user's username | true |
+|`username`| string | path |  | true |
 
 #### OK response
 
@@ -277,7 +277,7 @@ Status: 200 OK
 
 ### :octicons-lock-16:{: .lock } Create a new ongoing match
 
-It allows to create a new match for the authenticated user setting they as HOST of the match.
+It allows to create a new match for the authenticated user, setting them as `host` of the match.
 
 <pre>
 <code><span class="bg-indigo text-white rounded-1 px-2 py-1" style="text-transform: uppercase">post</span> /HOST:PORT/api/ongoing_matches/</code>
@@ -337,10 +337,10 @@ List all ongoing matches.
 
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
-|`ordering`| string | param | if equal to one in [host_helo, -host_elo] the ongoing match list will be ordered | false |
-|`is_full`| bool | param | if true only the matches that already have a challenger will be returned, otherwise the ones without a challenger | false |
-|`max_elo`| number | param | if given the the ongoing matches hosted by an user with an elo greater than <max_elo> will not be returned | false |
-|`min_elo`| number | param | if given the the ongoing matches hosted by an user with an elo less than <min_elo> will not be returned | false |
+|`ordering`| string | param | if equal to one in `[host_elo, -host_elo]` the ongoing match list will be ordered | false |
+|`is_full`| bool | param | if true, only the matches that already have a challenger will be returned, otherwise the ones without a challenger | false |
+|`max_elo`| number | param | if given, the ongoing matches hosted by an user with an elo greater than `max_elo` will not be returned | false |
+|`min_elo`| number | param | if given the the ongoing matches hosted by an user with an elo less than `min_elo` will not be returned | false |
 
 
 #### OK response
@@ -402,7 +402,7 @@ Status: 200 OK
 
 ### :octicons-lock-16:{: .lock } Ongoing match detail
 
-Get detail of specific ongoing match using his `id`.
+Get detail of a specific ongoing match using his `id`.
 
 <pre>
 <code><span class="bg-blue text-white rounded-1 px-2 py-1" style="text-transform: uppercase">get</span> /HOST:PORT/api/ongoing_matches/{id}/</code>
@@ -488,7 +488,7 @@ Get detail of the host, the challenger or the spectators of a specific match.
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
 |`id`| string | path | id number of the ongoing match | true |
-|`role`| string | path | choose one in [host, challenger, spectators] | true | 
+|`role`| string | path | choose one in `[host, challenger, spectators]` | true | 
 
 #### OK response
 
@@ -510,7 +510,7 @@ Status: 200 OK
 
 ### Creation of a completed match
 
-A completed match can't be created from an user, but it is automatically generated after the end of an ongoing match.
+Completed matches are only automatically generated after the end of an ongoing match.
 
 
 ### :octicons-lock-16:{: .lock } List completed matches
@@ -526,13 +526,15 @@ List all completed matches.
 
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
-|`ordering`| string | param | if equal to one in [id, winner_username, loser_username, start_timestamp, end_timestamp, completion_timestamp, winner_score, loser_score, winner_elo_before_match, winner_elo_after_match, loser_elo_before_match, loser_elo_after_match] the ongoing match list will be ordered. Put a ' - ' before the ordering type for descending order | false |
-|`winner_username`| string | param | filter completed match with a specific winner | false |
-|`loser_username`| string | param | filter completed match with a specific loser | false |
-|`user`| string | param | filter completed match with a specific user, it is not important if it is a winner or a loser | false |
+|`ordering`| string | param | if equal to one in `[id, winner, loser, start_timestamp, end_timestamp, completion_timestamp, winner_score, loser_score, winner_elo_before_match, winner_elo_after_match, loser_elo_before_match, loser_elo_after_match]` the ongoing match list will be ordered. Put a ' - ' before the ordering type for descending order | false |
+|`winner`| string | param | filter completed matches with a specific winner | false |
+|`loser`| string | param | filter completed matches with a specific loser | false |
+|`user`| string | param | filter completed matches with a specific user, it is not important if it is a winner or a loser | false |
 |`end_timestamp_after`| datetime | param | the matches completed before the passed parameter will not be returned | false |
 |`end_timestamp_before`| datetime | param | the matches completed after the passed parameter will not be returned  | false | 
 
+!!! note
+    `datetime` parameters must be formatted as: `yy:mm:dd` 
 
 #### OK response
 
