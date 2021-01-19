@@ -7,7 +7,7 @@ Qualcosa ad alto livello tipo sul fatto che è client-server usa le socket ecc
 The following diagram provides an abstract overall outline of the entities in the system and the relationship between 
 them.
 
-![Diagramma](wip)
+![Diagramma](/assets/IMG_2051.GIF)
 
 ## Database 
 
@@ -19,7 +19,7 @@ The different kind of information are stored in separate SQL tables, which are:
 * `rest_api_user` -  Stores different information about the users.
 * `rest_api_ongoingmatch` - Stores information about ongoing matches.
 * `rest_api_completedmatch` - Stores information about completed matches.
-* `authtoken_token` - Token 
+* `authtoken_token` - Stores tokens and relative users. 
 
 ### Users
 
@@ -31,7 +31,7 @@ progress.
                preserve the privacy of the users.
 * `email` - E-mail address associated to the account.
 
-Apart from the login data, other information concerning the gaming state of the user is stored, such as: 
+Other information concerning the gaming state of the user is stored, such as: 
 
 * `ongoing_match_id` - Containing the unique identifier of the match in which the user is participating, if playing, 
                        otherwise _`<null>`_.
@@ -52,11 +52,9 @@ Here follows an example of the _rest_api_user_ dataset table.
 | 2 | pbkdf2_sha256$... | 2021-01-18 18:00:00 |emanuele| e.darminio4@studenti.unisa.it | 2021-01-18 | C | 3 | 1000 | 
 | 3 | pbkdf2_sha256$... | 2021-01-18 18:00:00 | marta | m.silla@studenti.unisa.it | 2021-01-18 | S | 3 | 1000 |
 
-#### Contraints
-
 ### Ongoing matches
 
-To correctly link the players and spectators to the same match and synchronize their gaming status, each user keeps a 
+To correctly link players and spectators to the same match and synchronize their gaming status, each user keeps a 
 reference to the relative ongoing match. The list of ongoing matches is stored in the dataset.
 
 Each entry contains the following fields:
@@ -73,12 +71,10 @@ Here follows an example of the _rest_api_ongoing_matches_ dataset table.
 | -------| ----------- | ------------ | ------------ | --------- | 
 | 3 | 2021-01-18 18:48:00 | 2021-01-18 18:50:00 |  1 | 1 |  
 
-#### Contraints
-
 ### Completed matches 
 
-When a match is completed the system stores the players scores and elos in order to keep track of their progress and 
-allow competition.
+When a match is completed the system stores its relative information, along with the players scores and elos, in order 
+to keep track of their progress.
 
 | __id__ | start_timestamp      | completion_timestamp | loser_id | winner_id | loser_elo_after_match | loser_elo_before_match | loser_score | winner_elo_after_match | winner_elo_before_match | winner_score |
 | -------| -------------------- | ------------ | ------------ | --------- | ---- | --- | --- | --- | --- | --- | 
@@ -87,7 +83,11 @@ allow competition.
 
 #### Contraints
 
-
+To preserve the accuracy and the reliability of the data in the database, additional constraints are specified for 
+SQL tables containing information about matches.
+Loser ID and winner ID must be different, the score of the winner must be higher than the score of the loser and the 
+elo of the player must be coherently increase in case of victory and decrease in case of defeat. 
+Also completion time must be subsequent to start time.
 
 ### Tokens
 
@@ -107,9 +107,25 @@ user ID as follows:
 
 ## Server
 
+### API
+
+Users can register to the platform through the server API. (con la post) 
+After signing up each user is associated to a token used to authenticate themself when logging in.
+
+Once authenticated, users can access the list of registered users, ongoing matches and completed matches. (e vedere le info filtrate)
+
+Through a POST operation on the server API, users can create a new ongoing match, for which they'll assume the role of 
+host. The server returns the ID of the match.
+
+
+### WebSockets
+
+Potential challengers and spectators can access the list of ongoing matches through the API server and establish a 
+websocket connection with the server.
 
 
 
 ## Client
 
-
+After the connection is established and both players are ready, the clients can start exchanging information with the 
+server through the socket.
