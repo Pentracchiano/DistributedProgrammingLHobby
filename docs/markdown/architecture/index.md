@@ -1,6 +1,8 @@
 # Overview
 
-Qualcosa ad alto livello tipo sul fatto che è client-server usa le socket ecc
+The system is structured as a client-server architecture. Clients communicate with the server using a server API and
+websocket connections. The server makes use of a database to store information about the users and the matches.
+
 
 ## Diagram
 
@@ -122,10 +124,13 @@ host. The server returns the ID of the match.
 
 Potential challengers and spectators can access the list of ongoing matches through the API server and establish a 
 websocket connection with the server.
-
+Server handles websocket protocol requests during the game and updates the clients about the state of the match.
 
 
 ## Client
 
-After the connection is established and both players are ready, the clients can start exchanging information with the 
-server through the socket.
+After the connection is established and both players are ready, the clients can start a session and begin exchanging
+information with the server through the socket.
+
+In particular, the players can use the socket to send commands to the server so it can update the state of the game. 
+The commands can be: _up_, _down_, _fast up_, _fast down_.
