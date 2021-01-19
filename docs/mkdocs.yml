@@ -14,7 +14,7 @@ theme:
   features:
     - navigation.tabs
     - navigation.instant
-    - toc.integrate
+#    - toc.integrate
   icon:
     repo: fontawesome/brands/github
 markdown_extensions:
