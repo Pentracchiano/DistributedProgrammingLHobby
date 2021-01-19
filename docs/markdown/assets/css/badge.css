@@ -5,6 +5,14 @@
     background-color: hsla(231, 48%, 48%, 1) !important;
 }
 
+.lock {
+    color: #ff9100;
+}
+
+.unlock{
+    color: dodgerblue;
+}
+
 .bg-red {
     background-color: #ff0800 !important;
 }
@@ -24,4 +32,10 @@
 .px-2 {
     padding-right: 8px !important;
     padding-left: 8px !important;
+}
+
+th {
+    background-color: hsla(0, 0%, 96%, 1) !important;
+    color: #3e3e3e !important;
+    font-weight: bold !important;
 }
