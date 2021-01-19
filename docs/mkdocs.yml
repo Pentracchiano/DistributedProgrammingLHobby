@@ -24,6 +24,7 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.inlinehilite
   - pymdownx.tabbed
+  - pymdownx.details
   - footnotes
   - attr_list
   - toc:
@@ -46,6 +47,4 @@ nav:
   - 'Code description and examples':
       - 'Project structure': 'code-description-and-examples/index.md'
       - 'REST API': 'code-description-and-examples/rest_api.md'
-      - 'Game':
-          - 'Pong inner workings': 'code-description-and-examples/game.md'
-          - 'Websockets': 'code-description-and-examples/websockets.md'
+      - 'Pong inner workings': 'code-description-and-examples/game.md'
