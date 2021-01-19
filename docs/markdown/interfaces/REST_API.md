@@ -407,7 +407,7 @@ Status: 200 OK
 Get detail of specific ongoing match using his `id`.
 
 <pre>
-<code><span class="bg-blue text-white rounded-1 px-2 py-1" style="text-transform: uppercase">get</span> /HOST:PORT/api/users/{username}/</code>
+<code><span class="bg-blue text-white rounded-1 px-2 py-1" style="text-transform: uppercase">get</span> /HOST:PORT/api/ongoing_matches/{id}/{role}/</code>
 </pre>
 
 
@@ -415,7 +415,8 @@ Get detail of specific ongoing match using his `id`.
 
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
-|`username`| string | path | user's username | true |
+|`id`| string | path | id number of the ongoing match | true |
+|`role`| string | path | if given on in [host, challenger, spectators] the response data will be the detail of the users in the specific match | false |
 
 #### OK response
 
