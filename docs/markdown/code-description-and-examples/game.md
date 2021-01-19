@@ -113,3 +113,13 @@ the `Output` and sending them at the Django Channels group of the corresponding 
 to its client the message with the game status update.
 
 The whole implementation of this is found in `game/pong/queue/`.
+
+!!!caution
+    The size of the queues is an important parameter to set. Let's imagine that the server experiences a brief connection
+    problem and, as a consequence, the output queue starts to accumulate items to be sent. It is important that the clients
+    receive the most up-to-date status as possible to be able to play correctly: therefore, dropping *some* old packets
+    will actually be beneficial to the clients, even if they experience a slight *jump* in their view of the game.
+
+    If the queue is *too big*, this packet drop **never happens**, and the clients risk *living in the past* if problems arise.
+
+    If the queue is *too small*, packets could be dropped when they could be easily sent in time.
