@@ -7,42 +7,45 @@ use_directory_urls: false
 
 docs_dir: markdown
 
-extra_css: [assets/css/badge.css]
+extra_css: [ assets/css/badge.css ]
 
 theme:
-        name: material
-        features:
-                - navigation.tabs
-                - navigation.instant
-                - toc.integrate
-        icon:
-                repo: fontawesome/brands/github
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.instant
+    - toc.integrate
+  icon:
+    repo: fontawesome/brands/github
 markdown_extensions:
-        - admonition
-        - pymdownx.superfences
-        - pymdownx.highlight
-        - pymdownx.keys
-        - pymdownx.inlinehilite
-        - pymdownx.tabbed
-        - footnotes
-        - attr_list
-        - toc:
-              toc_depth: 3
-        - pymdownx.emoji:
-              emoji_index: !!python/name:materialx.emoji.twemoji
-              emoji_generator: !!python/name:materialx.emoji.to_svg
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.keys
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed
+  - footnotes
+  - attr_list
+  - toc:
+      toc_depth: 3
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
 
 nav:
-        - Introduction:
-                  - LHobby: 'introduction/index.md'
-                  - Installation: 'introduction/installation.md'
-                  - Usage: 'introduction/usage.md'
-        - 'External dependencies': 'external dependencies/index.md'
-        - Architecture:
-                  - 'Overview': 'architecture/index.md'
-        - Interfaces:
-                  - 'REST API': 'interfaces/REST_API.md'
-                  - 'Websockets': 'interfaces/websockets.md'
-        - 'Code description and examples':
-                  - 'Project structure': 'relevant code description/index.md'
-                  - 'Rest API': 'relevant code description/rest_api.md'
+  - Introduction:
+      - LHobby: 'introduction/index.md'
+      - Installation: 'introduction/installation.md'
+      - Usage: 'introduction/usage.md'
+  - 'External dependencies': 'external-dependencies/index.md'
+  - Architecture:
+      - 'Overview': 'architecture/index.md'
+  - Interfaces:
+      - 'REST API': 'interfaces/REST_API.md'
+      - 'Websockets': 'interfaces/websockets.md'
+  - 'Code description and examples':
+      - 'Project structure': 'code-description-and-examples/index.md'
+      - 'REST API': 'code-description-and-examples/rest_api.md'
+      - 'Game':
+          - 'Pong inner workings': 'code-description-and-examples/game.md'
+          - 'Websockets': 'code-description-and-examples/websockets.md'
