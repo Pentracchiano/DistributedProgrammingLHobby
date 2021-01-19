@@ -526,10 +526,12 @@ List all completed matches.
 
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
-|`ordering`| string | param | if equal to one in [id, winner_username, loser_username, start_timestamp, end_timestamp, completion_timestamp, winner_score, loser_score, winner_elo_before_match, winner_elo_after_match, loser_elo_before_match, loser_elo_after_match] the ongoing match list will be ordere. Put a ' - ' before the ordering type for descending order | false |
+|`ordering`| string | param | if equal to one in [id, winner_username, loser_username, start_timestamp, end_timestamp, completion_timestamp, winner_score, loser_score, winner_elo_before_match, winner_elo_after_match, loser_elo_before_match, loser_elo_after_match] the ongoing match list will be ordered. Put a ' - ' before the ordering type for descending order | false |
 |`winner_username`| string | param | filter completed match with a specific winner | false |
 |`loser_username`| string | param | filter completed match with a specific loser | false |
 |`user`| string | param | filter completed match with a specific user, it is not important if it is a winner or a loser | false |
+|`end_timestamp_after`| datetime | param | the matches completed before the passed parameter will not be returned | false |
+|`end_timestamp_before`| datetime | param | the matches completed after the passed parameter will not be returned  | false | 
 
 
 #### OK response
@@ -557,4 +559,43 @@ Status: 200 OK
 ]
 
 ```
+
+### :octicons-lock-16:{: .lock } Completed match detail
+
+Get detail of specific completed match using his `id`.
+
+<pre>
+<code><span class="bg-blue text-white rounded-1 px-2 py-1" style="text-transform: uppercase">get</span> /HOST:PORT/api/completed_matches/{id}/</code>
+</pre>
+
+
+#### Parameters
+
+| Name | Type | In | Description | Required |
+|-|-|-|-|-| 
+|`id`| string | path | id number of the completed match | true |
+
+#### OK response
+
+```
+Status: 200 OK
+```
+
+```json
+{
+    "id": 1,
+    "winner": "davide",
+    "loser": "emanuele",
+    "start_timestamp": "2021-01-16T16:40:51.981401Z",
+    "completion_timestamp": "2021-01-16T16:41:20.669025Z",
+    "winner_score": 5,
+    "loser_score": 4,
+    "winner_elo_before_match": 1000,
+    "loser_elo_before_match": 1000,
+    "winner_elo_after_match": 1050,
+    "loser_elo_after_match": 950
+}
+```
+
+
 
