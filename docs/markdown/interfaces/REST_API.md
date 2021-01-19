@@ -407,7 +407,7 @@ Status: 200 OK
 Get detail of specific ongoing match using his `id`.
 
 <pre>
-<code><span class="bg-blue text-white rounded-1 px-2 py-1" style="text-transform: uppercase">get</span> /HOST:PORT/api/ongoing_matches/{id}/{role}/</code>
+<code><span class="bg-blue text-white rounded-1 px-2 py-1" style="text-transform: uppercase">get</span> /HOST:PORT/api/ongoing_matches/{id}/</code>
 </pre>
 
 
@@ -416,7 +416,6 @@ Get detail of specific ongoing match using his `id`.
 | Name | Type | In | Description | Required |
 |-|-|-|-|-| 
 |`id`| string | path | id number of the ongoing match | true |
-|`role`| string | path | if given on in [host, challenger, spectators] the response data will be the detail of the users in the specific match | false |
 
 #### OK response
 
@@ -426,17 +425,95 @@ Status: 200 OK
 
 ```json
 {
+"id": 41,
+"host": {
     "username": "marta",
     "date_joined": "2021-01-18T19:08:25.023237Z",
     "elo": 1000,
-    "ongoing_match": null,
-    "role": null,
+    "ongoing_match": 41,
+    "role": "H",
+    "first_name": "",
+    "last_name": ""
+},
+"spectators": [],
+"challenger": {
+    "username": "davide",
+    "date_joined": "2021-01-15T23:18:11.368676Z",
+    "elo": 1000,
+    "ongoing_match": 41,
+    "role": "C",
+    "first_name": "",
+    "last_name": ""
+},
+"creation_timestamp": "2021-01-19T09:56:45.727233Z",
+"start_timestamp": null,
+"is_started": false,
+"is_challenger_ready": false
+}
+```
+
+### :octicons-lock-16:{: .lock } Delete specific ongoing match
+
+Delete a specific ongoing match given the match `id`. 
+
+<pre>
+<code><span class="bg-red text-white rounded-1 px-2 py-1" style="text-transform: uppercase">delete</span> /HOST:PORT/api/ongoing_matches/{id}/</code>
+</pre>
+
+!!! note
+    An ongoing match can be deleted only from its host and only if it is not started yet.
+
+#### Parameters
+
+| Name    | Type | In | Description | Required |
+|-|-|-|-|-| 
+|`id`| string | path |  id number of the ongoing match to delete | true |
+
+
+#### Response
+
+```
+Status: 204 No Content
+```
+
+### :octicons-lock-16:{: .lock } Ongoing match user detail
+
+Get detail of the host, the challenger or the spectators of a specific match.
+
+<pre>
+<code><span class="bg-blue text-white rounded-1 px-2 py-1" style="text-transform: uppercase">get</span> /HOST:PORT/api/ongoing_matches/{id}/{role}/</code>
+</pre>
+
+
+#### Parameters
+
+| Name | Type | In | Description | Required |
+|-|-|-|-|-| 
+|`id`| string | path | id number of the ongoing match | true |
+|`role`| string | path | choose one in [host, challenger, spectators] | true | 
+
+#### OK response
+
+```
+Status: 200 OK
+```
+
+```json
+{
+    "username": "davide",
+    "date_joined": "2021-01-15T23:18:11.368676Z",
+    "elo": 1000,
+    "ongoing_match": 41,
+    "role": "C",
     "first_name": "",
     "last_name": ""
 }
 ```
 
+### Creation of a completed match
 
-### Completed matches
+A completed match can't be created from an user, but it is automatically generated after the end of an ongoing match.
+
+
 
 
