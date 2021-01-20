@@ -129,3 +129,8 @@ This will [start the game](../code-description-and-examples/game.md#controller) 
 
 ### Game phase
 
+The game is started and now the pong game screen is shown to all the clients connected to the same match.
+
+![pong](/assets/pong-start.png)
+
+During the match the host controls the left paddle and the challenger the right one. To control 
