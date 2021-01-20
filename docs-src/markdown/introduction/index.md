@@ -3,7 +3,7 @@
 ## Scope
 
 This documentation describes the development of the final project for the Distributed Programming class 2020/21 of 
-University of Salerno. It is intended to demonstrate and put to practice the knowledge acquired during the course. 
+University of Salerno. The project intends to demonstrate and put to practice the knowledge acquired during the course. 
 
 ### Group
 
