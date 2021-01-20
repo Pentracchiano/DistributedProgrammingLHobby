@@ -56,7 +56,7 @@ If the websocket request is not acceptable it maybe caused by server several err
   
 #### Host related error
   
-##### The client is an host of a match but the match he wants to join is another one:
+##### The client requested to be an host of a match different from the one already hosted:
 
 ```json
 {"error": "trying to join a match as host which you did not start", "code": 8}
