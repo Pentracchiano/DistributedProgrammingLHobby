@@ -601,3 +601,4 @@ Status: 200 OK
 
 
 
+Mettere cosa fa l'utente con l'api rest e cosa fa con le websocket, tipo flusso di esecuzione e dopo scrivere nella prossima sezione websockets.. : )
