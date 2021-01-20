@@ -9,7 +9,7 @@ the `role` of the client in the match. The client must be __authenticated__ to c
 
 ### Connection phase
 
-First of all the client should start the communication with the server. In this phase the user must specify the role and the `id` of the match to join.
+First of all, the client should start the communication with the server. In this phase the user must specify the role and the `id` of the match to join.
 
 In order to start the communication, the client must open a websocket connection using the following url:
 
@@ -18,7 +18,7 @@ In order to start the communication, the client must open a websocket connection
 ws://HOST:PORT/ws/game/{match_id}/?role={role}
 ```
 
-If the websocket request is not acceptable it maybe caused by server several errors.
+The connection may be rejected due to several errors described below.
 
 #### Role independent errors
 
@@ -73,17 +73,17 @@ Finally, if everything is ok for the server, the connection is established, and 
 ```
 
 From now on the websocket server can receive different type of `commands` from its client. If the requested role is `spectator`, 
-the websocket server will ignore all the command coming from that user. 
+the websocket server will ignore all the commands coming from that user. 
 
 ### Game initialization phase
 
-After established the connection with the websocket server for a specific ongoing match, it is time to start the game.
+After having established the connection with the websocket server for a specific ongoing match, it is time to start the game.
 The host of the match is responsible for starting the match. A match can start only if a challenger is present and is 
 ready to play.
 
 #### Role independent error
 
-If a client sends a message without the `command` keyword, the websocket server will always answer as follow:
+If a client sends a message without the `command` keyword, the websocket server will always answer as below:
 
 ```json
 
