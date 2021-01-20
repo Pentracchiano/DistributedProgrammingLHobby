@@ -86,7 +86,7 @@ In order to test the game and the game only, an input-output implementation was 
 and the screen. It can be found in the package `game/pong/test/`, together with a `testing.py` module which can be
 executed stand-alone to test the game locally. 
 
-??? example "Game controls *(click to expand)*"
+!!! example "Game controls *(click to expand)*"
     The local game supports two players: the left player should use:
 
     - ++w++ for moving the paddle upwards,
@@ -104,10 +104,10 @@ executed stand-alone to test the game locally.
 In order to use the game from multiple threads correctly, an input-output implementation was created which makes use of
 a custom `CircularQueue` class. This thread-safe queue is based on the `collections.deque` class,
 can be configured to have a maximum size, after which old elements are replaced with new ones as they are inserted.
-The queue uses the `wait/notify` pattern with *condition variables* in order to expose a blocking get method.
+The queue uses the `wait/notify` pattern with *condition variables* in order to expose a blocking `get` method.
 
 While the consumer of the `Input` queue is the controller itself and the producer is the websocket client,
-it is now needed a consumer for dequeueing the items in the `Output` queue.
+it is now needed a consumer for dequeueing the items in the `Output` queue inserted by the controller game loop.
 That is why the `game/pong_output_consumer.py` module was created. Its responsibility lies in dequeueing messages from
 the `Output` and sending them at the Django Channels group of the corresponding match. Then, each websocket will send
 to its client the message with the game status update.
