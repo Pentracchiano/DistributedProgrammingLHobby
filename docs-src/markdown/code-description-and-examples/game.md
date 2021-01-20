@@ -116,7 +116,7 @@ The output queue inserts a `#!python "message_type"` key in the dictionary in or
 three methods created the `data` object which was put in the queue.
 Here is a snippet which shows this behaviour:
 
-```python
+```python linenums="1"
 from game.pong.queue.circular_queue import CircularQueue
 
 

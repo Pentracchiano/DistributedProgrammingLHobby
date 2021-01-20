@@ -11,7 +11,7 @@ Django [*Object Relational Mapping (ORM)*](https://docs.djangoproject.com/en/3.1
 of users, session management, multithreaded request handling. 
 
 In particular, the ORM was extremely useful for easily modifying and accessing the database directly in Python,
-abstracting the SQL tables as object-oriented classes. 
+abstracting the SQL tables as object-oriented classes: the Django models. 
 It also made possible the version control of the different
 database changes through the proper use of [migrations](https://docs.djangoproject.com/en/3.1/topics/migrations/); this
 helped the collaborative process, especially by making sure everyone on the team had the same version of the database. 
@@ -27,15 +27,22 @@ no problems would have arisen.
     the *reinvention of the wheel*.
 
 Usually, Django is used stand-alone only in order to build Web pages; what we did want was instead a REST API, in order
-to be independent from the particular client chosen. So, the actual HTTP and Websocket requests were served by two
+to be independent from the particular choice of client. So, the actual HTTP and Websocket requests were served by two
 Django libraries which expand the framework capabilities.
 
 ### [Django REST framework](https://www.django-rest-framework.org/)
 
-Django REST framework is 
+Django REST framework adapts Django normal operations to work with HTTP methods commonly used in REST APIs, such as
+`DELETE`, providing with standard implementations — in this example, it would remove the requested resource.
 
-#### Token authentication
+This particular framework was chosen because well integrated with the Django ORM: resources are, if necessary,
+able to be directly mapped to Django models.
 
-### [Django channels](https://channels.readthedocs.io/en/stable/)
+### Websockets
 
-#### Websockets
+The game itself is a real-time application. Building one with REST calls is not ideal, especially in the case of a game,
+where the server sends information about its state periodically without the clients requesting. 
+
+Therefore, a better-suited protocol was needed, and Webs
+
+#### [Django Channels](https://channels.readthedocs.io/en/stable/)

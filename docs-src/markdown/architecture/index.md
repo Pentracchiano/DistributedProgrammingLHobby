@@ -123,7 +123,7 @@ Once authenticated, users can access the list of registered users, ongoing match
 Through a POST operation on the server API, users can create a new ongoing match, for which they'll assume the role of 
 host. The server returns the ID of the match.
 
-For further detail, check the [REST API section](../interfaces/rest-api.md)
+For further detail, check the [REST API section](../interfaces/rest-api.md).
 
 #### WebSockets
 
