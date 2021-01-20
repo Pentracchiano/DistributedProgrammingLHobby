@@ -129,3 +129,91 @@ This will [start the game](../code-description-and-examples/game.md#controller) 
 
 ### Game phase
 
+The game has started and now the pong game screen is built by the clients connected to the same match, taking into 
+account the parameters inside the init message, such as:
+
+```json
+
+{
+    "message_type": "init",
+
+    "ball_radius": 0.02,
+    "paddle_height": 0.13,
+    "paddle_width": 0.02
+}
+
+```
+
+![pong](/assets/pong-start.png)
+
+During the match the host controls the left paddle and the challenger the right one. In order to play, users can send 
+the following commands:
+
+```json
+
+{"command": "up"}
+
+```
+
+```json
+
+{"command": "down"}
+
+```
+
+```json
+
+{"command": "fup"}
+
+```
+
+```json 
+
+{"command": "fdown"} 
+
+```
+
+During the game, for each `game_tick`, the websocket server sends the clients all the messages containing the information
+necessary to update the game status.
+
+```json
+
+{
+    "message_type": "status",
+
+    "has_bounced": true,
+    "left_paddle_margin_reached": false,
+    "right_paddle_margin_reached": true,
+    "left_score": 4,
+    "right_score": 3,
+    "left_paddle_y": 0.5,
+    "right_paddle_y": 0.3,
+    "ball_x": 0.6,
+    "ball_y": 1,
+    "match_time": 33,
+    "sudden_death": false
+}
+
+```
+
+When the match is over, the server sends all participants a end message. The information is contained in a 
+serialized completed match object — the same that would be sent from the 
+[completed match API](rest-api.md#completed-match-detail).
+
+```json
+{
+    "message_type": "end",
+
+    "id": 1,
+    "winner": "davide",
+    "loser": "emanuele",
+    "start_timestamp": "2021-01-16T16:40:51.981401Z",
+    "completion_timestamp": "2021-01-16T16:41:20.669025Z",
+    "winner_score": 5,
+    "loser_score": 4,
+    "winner_elo_before_match": 1000,
+    "loser_elo_before_match": 1000,
+    "winner_elo_after_match": 1050,
+    "loser_elo_after_match": 950
+}
+```

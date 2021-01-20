@@ -1,15 +1,16 @@
-# Overview
+# Architecture overview
 
-The system is structured as a client-server architecture. Clients communicate with the server using a server API and
-websocket connections. The server makes use of a database to store information about the users and the matches.
+The system is structured as a __client-server__ architecture. Clients communicate with the server using a __server API__
+and __websocket__ connections. The server makes use of a __database__ to store information about the users and the 
+matches.
 
 
 ## Diagram
 
 The following diagram provides an abstract overall outline of the entities in the system and the relationship between 
-them.
+them, presenting an example of a use case of the system.
 
-![Diagramma](/assets/IMG_2051.GIF)
+![Diagramma](/assets/Opera_senza_titolo.gif)
 
 ## Database 
 
@@ -25,7 +26,7 @@ The different kind of information are stored in separate SQL tables, which are:
 
 ### Users
 
-The system stores the following login information in order to let them register to the platform and keep track of their 
+The system stores the following __login information__ in order to let them register to the platform and keep track of their 
 progress. 
 
 * `username` - Unique username associated to the player required to log in.
@@ -33,20 +34,20 @@ progress.
                preserve the privacy of the users.
 * `email` - E-mail address associated to the account.
 
-Other information concerning the gaming state of the user is stored, such as: 
+Other information concerning the __gaming state__ of the user is stored, such as: 
 
 * `ongoing_match_id` - Containing the unique identifier of the match in which the user is participating, if playing, 
                        otherwise _`<null>`_.
 * `role` - Containing information about the role of the player, if associated to an ongoing match. The different possible 
 roles are:   _host_, _challenger_, _spectator_.
 
-Fields carrying other generic information about the user are:
+Fields carrying other __generic information__ about the user are:
 
 * `elo` - Rating score indicating the skill level of the player.
 * `date_joined` - Date and time of the registration of the user.
 * `last_login` - Date and time of the last log in of the user.
 
-Here follows an example of the _rest_api_user_ dataset table.
+Here follows an example of the _rest_api_user_ database table.
 
 | __id__ | password | last_login | username | email | date_joined | role | ongoing_match_id | elo |
 | -------| ----------- | ------------ | ------------ | --------- | --------------- | -------- | -------------------- | ------- |
@@ -57,7 +58,7 @@ Here follows an example of the _rest_api_user_ dataset table.
 ### Ongoing matches
 
 To correctly link players and spectators to the same match and synchronize their gaming status, each user keeps a 
-reference to the relative ongoing match. The list of ongoing matches is stored in the dataset.
+reference to the relative ongoing match. The list of ongoing matches is stored in the database.
 
 Each entry contains the following fields:
 
@@ -67,7 +68,7 @@ Each entry contains the following fields:
 * `is_started` - Boolean value used to know whether the game has started.
 * `is_challenger_ready` - Boolean value used to alert the host that the challenger is ready. 
 
-Here follows an example of the _rest_api_ongoing_matches_ dataset table.
+Here follows an example of the _rest_api_ongoing_matches_ database table.
 
 | __id__ | creation_timestamp | start_timestamp | is_started | is_challenger_ready |
 | -------| ----------- | ------------ | ------------ | --------- | 
@@ -83,19 +84,19 @@ to keep track of their progress.
 | 1 | 2021-01-18 18:18:00 | 2021-01-18 18:30:00 |  1 | 2 |  950 | 1000 | 4 | 1050 | 1000 | 5 |
 | 2 | 2021-01-18 18:28:00 | 2021-01-18 18:40:00 | 2 | 1 | 1000 | 1050 | 4 | 950 | 1000 | 5 |
 
-#### Contraints
-
-To preserve the accuracy and the reliability of the data in the database, additional constraints are specified for 
-SQL tables containing information about matches.
-Loser ID and winner ID must be different, the score of the winner must be higher than the score of the loser and the 
-elo of the player must be coherently increase in case of victory and decrease in case of defeat. 
-Also completion time must be subsequent to start time.
+!!!info "Constraints"
+    
+    To preserve the accuracy and the reliability of the data in the database, additional constraints are specified for 
+    SQL tables containing information about matches.
+    Loser ID and winner ID must be different, the score of the winner must be higher than the score of the loser and the 
+    elo of the player must be coherently increased in case of victory and decreased in case of defeat. 
+    Also completion time must be subsequent to start time.
 
 ### Tokens
 
-The token based authentication provided by the Django REST framework is used to allow users to verify their identity  
-After the registration of a new user, the login function returns the token associated with the user. This token is then 
-used to access the authenticated API.
+The token based authentication provided by the Django REST framework is used to allow users to verify their identity.  
+After the registration of a new user, the [login function](../interfaces/REST_API.md#get-authorization-token) returns 
+the token associated with the user. This token is then used to access the authenticated API.
 
 In order to verify the identity of the user, tokens are stored in a SQL table and associated with the corresponding 
 user ID as follows:
@@ -109,7 +110,7 @@ user ID as follows:
 
 ## Server
 
-### API
+#### API
 
 Users can register to the platform through the server API. (con la post) 
 After signing up each user is associated to a token used to authenticate themself when logging in.
@@ -119,18 +120,35 @@ Once authenticated, users can access the list of registered users, ongoing match
 Through a POST operation on the server API, users can create a new ongoing match, for which they'll assume the role of 
 host. The server returns the ID of the match.
 
+For further detail, check the [REST API section](../interfaces/REST_API.md)
 
-### WebSockets
+#### WebSockets
 
-Potential challengers and spectators can access the list of ongoing matches through the API server and establish a 
-websocket connection with the server.
+Potential challengers and spectators can access the list of ongoing matches through the API server and thus establish a 
+websocket connection with the server specifying the ID of the match and their role.
+
 Server handles websocket protocol requests during the game and updates the clients about the state of the match.
+
+For further detail, check the [websocket section](../interfaces/websockets.md).
 
 
 ## Client
 
+Clients interact both with the API and the Websocket server.
+
 After the connection is established and both players are ready, the clients can start a session and begin exchanging
 information with the server through the socket.
 
-In particular, the players can use the socket to send commands to the server so it can update the state of the game. 
+The nature of the exchanged messages depends on the ```role``` of the client.
+
+After creating a new ongoing match, hosts shall wait for an available challenger.
+
+Challengers can join an ongoing match and signal they're ready to play by pressing ++enter++.
+
+When the challenger is ready, the host can start the match by pressing ++enter++.
+
+Through the duration of the match, the players can use the socket to send commands to the server so it can update 
+the state of the game. 
 The commands can be: _up_, _down_, _fast up_, _fast down_.
+
+
