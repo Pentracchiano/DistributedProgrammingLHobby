@@ -29,8 +29,4 @@ It is possible to create or join a match as player or spectator, and after the g
 
 Since the platform makes use of language agnostic protocols, it is possible to link _cross-platform_ clients to it.
 
-## Navigating the docs
-
-todo
-
 Check how to get started and install __LHobby__ in the next section.
