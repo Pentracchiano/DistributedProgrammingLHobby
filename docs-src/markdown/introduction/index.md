@@ -33,4 +33,4 @@ Since the platform makes use of language agnostic protocols, it is possible to l
 
 todo
 
-Check how to getting started and install __LHobby__ in the next section.
+Check how to get started and install __LHobby__ in the next section.
