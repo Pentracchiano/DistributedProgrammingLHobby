@@ -65,7 +65,7 @@ Launch the client with the following command:
     ```
 
 The client allows you to login into the system, create or join a match and play against other users. Obviously you can
-execute two or more instances of the client to simulate more user connected to the system.
+execute two or more instances of the client to simulate more users connected to the system.
 
 Once you are in a match, and the pong screen is shown, you can play the game using the following keyboard commands:
 
