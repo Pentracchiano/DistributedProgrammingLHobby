@@ -599,6 +599,7 @@ Status: 200 OK
 }
 ```
 
+The API REST can be used in order to create a new match or to visualize the available ongoing matches. To join a match
+and play or spectate it clients shall use a websocket protocol. 
 
-
-Mettere cosa fa l'utente con l'api rest e cosa fa con le websocket, tipo flusso di esecuzione e dopo scrivere nella prossima sezione websockets.. : )
+Next section will discuss such websocket protocol.
