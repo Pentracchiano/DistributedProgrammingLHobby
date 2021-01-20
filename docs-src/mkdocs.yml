@@ -40,7 +40,7 @@ nav:
       - Usage: 'introduction/usage.md'
   - 'External dependencies': 'external-dependencies/index.md'
   - Architecture:
-      - 'Overview': 'architecture/index.md'
+      - 'Architecture overview': 'architecture/index.md'
   - Interfaces and protocols:
       - 'REST API': 'interfaces/rest-api.md'
       - 'Websockets': 'interfaces/websockets.md'
