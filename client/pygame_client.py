@@ -227,10 +227,10 @@ def graphics_handler(ws, size):
 def on_message(ws, message):
     global is_match_started, is_match_completed
     message = json.loads(message)
-    if role in ['host', 'challenger'] and not is_match_started:
+    if role in ['host', 'challenger'] and not is_match_started and message.get('message_type') == 'init':
         print(message)
         with lock:
-            is_match_started = message.get('message_type') == 'init'
+            is_match_started = True
             lock.notify()
     else:
         if message.get('message_type') == 'status':
@@ -240,7 +240,14 @@ def on_message(ws, message):
             is_match_completed = True
             end_game_info.update(message)
             ws.close()
+        elif message.get('code') == 0:
+            global is_socket_open
+            with lock:
+                is_socket_open = True
+                lock.notify()
         else:
+            with lock:
+                lock.notify()
             print(f'Unexpected message: {message}')
 
 
@@ -257,10 +264,7 @@ def on_close(ws):
 
 
 def on_open(ws):
-    global is_socket_open
-    with lock:
-        is_socket_open = True
-        lock.notify()
+    pass
 
 
 def output_consumer(ws):

@@ -1,3 +1,4 @@
+import enum
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
@@ -16,11 +17,21 @@ from game.pong.paddle import PaddleCommand
 games_to_input_handler = {}
 
 
+class GameConsumerStatusCodes(enum.IntEnum):
+    SUCCESS = 0
+
+    INVALID_COMMAND = 1
+    NO_COMMAND = 2
+    CHALLENGER_NOT_READY = 3
+    MATCH_ENDED = 4
+    BAD_MATCH_ID = 5
+    NOT_AUTHENTICATED = 6
+    BAD_QUERY_STRING = 7
+    NOT_HOST = 8
+    CANT_JOIN = 9
+
+
 class GameConsumer(JsonWebsocketConsumer):
-    INVALID_COMMAND = 0
-    NO_COMMAND = 1
-    CHALLENGER_NOT_READY = 2
-    MATCH_ENDED = 3
 
     MAX_INPUT_QUEUE_SIZE = 10
     MAX_OUTPUT_QUEUE_SIZE = 1
@@ -33,6 +44,7 @@ class GameConsumer(JsonWebsocketConsumer):
     }
 
     def connect(self):
+        self.accept()  # accepting in order to properly send errors through the socket - apparently, channels ignores ws codes for some reason
         try:
             self.match_id = int(self.scope['url_route']['kwargs']['match_id'])
         except ValueError:
@@ -43,6 +55,7 @@ class GameConsumer(JsonWebsocketConsumer):
         self.user = self.scope['user']
 
         if not self.user.is_authenticated:
+            self.send_json({'error': 'unauthenticated user, please send auth token', 'code': GameConsumerStatusCodes.NOT_AUTHENTICATED})
             self.close(4001)
             return
 
@@ -54,22 +67,26 @@ class GameConsumer(JsonWebsocketConsumer):
                                                max_num_fields=1
                                                )
         except ValueError:
+            self.send_json({'error': 'bad query string', 'code': GameConsumerStatusCodes.BAD_QUERY_STRING})
             self.close(4000)
             return
 
         try:
             requested_role = query_data[b'role'][0].decode('utf-8')
         except (KeyError, IndexError, UnicodeError):
+            self.send_json({'error': 'bad key in query string. expected: role', 'code': GameConsumerStatusCodes.BAD_QUERY_STRING})
             self.close(4000)
             return
 
         if requested_role not in ('spectator', 'host', 'challenger'):
+            self.send_json({'error': 'bad value in query string. expected: [spectator, host, challenger]', 'code': GameConsumerStatusCodes.BAD_QUERY_STRING})
             self.close(4000)
             return
 
         try:
             self.match = OngoingMatch.objects.get(pk=self.match_id)
         except OngoingMatch.DoesNotExist:
+            self.send_json({'error': 'non existent requested match', 'code': GameConsumerStatusCodes.BAD_MATCH_ID})
             self.close(4004)
             return
 
@@ -79,12 +96,15 @@ class GameConsumer(JsonWebsocketConsumer):
                     self.match.add_spectator(self.user)
                 elif requested_role == 'host':
                     if self.user.pk != self.match.host.pk:
-                        self.close(4003)
+                        self.send_json(
+                            {'error': 'trying to join a match as host which you did not start', 'code': GameConsumerStatusCodes.NOT_HOST})
+                        self.close()
                         return
                 elif requested_role == 'challenger':
                     self.match.challenger = self.user
             except ValueError:
-                self.close(4000)
+                self.send_json({'error': 'trying to join a match while already in another match or the match is full', 'code': GameConsumerStatusCodes.CANT_JOIN})
+                self.close()
                 return
 
             self.role = requested_role
@@ -95,21 +115,22 @@ class GameConsumer(JsonWebsocketConsumer):
                 self.match_group_name,
                 self.channel_name
             )
-        self.accept()
+        self.send_json({'status': 'success', 'code': GameConsumerStatusCodes.SUCCESS})
 
     def disconnect(self, close_code):
-        try:
-            self.match.refresh_from_db()
-        except OngoingMatch.DoesNotExist:
-            pass
-        else:
-            if hasattr(self, 'role'):  # if a role has been created - that is, the consumer has at least came to set the user
-                # The players remain in the game until the end of the game
-                if self.role == 'spectator':
-                    self.match.remove_spectator(self.user)
+        if hasattr(self, 'match'):
+            try:
+                self.match.refresh_from_db()
+            except OngoingMatch.DoesNotExist:
+                pass
+            else:
+                if hasattr(self, 'role'):  # if a role has been created - that is, the consumer has at least came to set the user
+                    # The players remain in the game until the end of the game
+                    if self.role == 'spectator':
+                        self.match.remove_spectator(self.user)
 
-                if self.role == 'challenger' and not self.match.is_started:
-                    self.match.remove_challenger()
+                    if self.role == 'challenger' and not self.match.is_started:
+                        self.match.remove_challenger()
 
         # Leave room group
         if hasattr(self, 'match_group_name'):
@@ -122,7 +143,7 @@ class GameConsumer(JsonWebsocketConsumer):
         try:
             self.match.refresh_from_db()
         except OngoingMatch.DoesNotExist:
-            self.send_json({'error': 'match ended, stop sending commands', 'code': GameConsumer.MATCH_ENDED})
+            self.send_json({'error': 'match ended, stop sending commands', 'code': GameConsumerStatusCodes.MATCH_ENDED})
             return
 
         if self.role == 'spectator':
@@ -131,7 +152,7 @@ class GameConsumer(JsonWebsocketConsumer):
         try:
             command = content['command']
         except KeyError:
-            self.send_json({'error': 'no command sent', 'code': GameConsumer.NO_COMMAND})
+            self.send_json({'error': 'no command sent', 'code': GameConsumerStatusCodes.NO_COMMAND})
             return
 
         # before match starts
@@ -149,20 +170,20 @@ class GameConsumer(JsonWebsocketConsumer):
                         games_to_input_handler[self.match.pk] = game_input
                     except IntegrityError:
 
-                        self.send_json({'error': 'challenger not ready', 'code': GameConsumer.CHALLENGER_NOT_READY})
+                        self.send_json({'error': 'challenger not ready', 'code': GameConsumerStatusCodes.CHALLENGER_NOT_READY})
                 else:
-                    self.send_json({'error': 'invalid command', 'code': GameConsumer.INVALID_COMMAND})
+                    self.send_json({'error': 'invalid command', 'code': GameConsumerStatusCodes.INVALID_COMMAND})
 
             elif self.role == 'challenger':
                 if command == 'ready':
                     self.match.set_challenger_ready()
                 else:
-                    self.send_json({'error': 'invalid command', 'code': GameConsumer.INVALID_COMMAND})
+                    self.send_json({'error': 'invalid command', 'code': GameConsumerStatusCodes.INVALID_COMMAND})
             return
 
         # match started
         elif command not in ('up', 'down', 'fup', 'fdown'):
-            self.send_json({'error': 'invalid command', 'code': GameConsumer.INVALID_COMMAND})
+            self.send_json({'error': 'invalid command', 'code': GameConsumerStatusCodes.INVALID_COMMAND})
             return
 
         input = games_to_input_handler[self.match.pk]
