@@ -38,11 +38,22 @@ Django REST framework adapts Django normal operations to work with HTTP methods 
 This particular framework was chosen because well integrated with the Django ORM: resources are, if necessary,
 able to be directly mapped to Django models.
 
-### Websockets
+### [Websockets](https://tools.ietf.org/html/rfc6455)
 
 The game itself is a real-time application. Building one with REST calls is not ideal, especially in the case of a game,
 where the server sends information about its state periodically without the clients requesting. 
 
-Therefore, a better-suited protocol was needed, and Webs
+Therefore, a better-suited protocol was needed: Websockets were chosen because they are full-duplex, work well in real-time,
+but primarily because they are based on an HTTP handshake. This means that browser clients are easily supported (support otherwise
+not achievable using normal UDP or TCP sockets), and user authentication can be handled with the same means used in the REST API.
 
 #### [Django Channels](https://channels.readthedocs.io/en/stable/)
+
+Django does not support Websockets, but the same organization maintains Django Channels, an extension of the framework
+which implements Websockets and other long-running protocols, such as MQTT. As REST framework, it has access to the Django ORM.
+
+An important peculiarity of Channels is the *channel layer*, a system which allowed us to exchange messages between
+the different Websocket handlers, the *consumers*. In particular, each Websocket connection of LHobby is linked to a *channel group*; 
+whenever there is a message that is to be sent to all the participants of a match (such as a game update), the server
+code sends it to the channel group. The channel layer then sends the message to each consumer, which handles it
+by simply sending it to the corresponding Websocket. 
