@@ -1,3 +1,5 @@
+# LHobby
+
 ## Scope
 
 This repository contains the code and the documentation of the final project for the Distributed Programming class 2020/21 of 
