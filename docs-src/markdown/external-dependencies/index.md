@@ -21,7 +21,10 @@ they are translated into the correct SQL dialect when the DBMS is configured, le
 choose early on: a simple one, SQLite, was chosen, and if it were to be changed (due to for example performance issues),
 no problems would have arisen.
 
-Learning and using this framework speeded up the development by a lot and avoided the reinvention of the wheel.
+!!! note
+    While learning to use this framework and related tools took a substantial chunk of time from the actual development,
+    it ended up being a good investment: it speeded up the construction of the features we wanted to implement and avoided
+    the *reinvention of the wheel*.
 
 Usually, Django is used stand-alone only in order to build Web pages; what we did want was instead a REST API, in order
 to be independent from the particular client chosen. So, the actual HTTP and Websocket requests were served by two

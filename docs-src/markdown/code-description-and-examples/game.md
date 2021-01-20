@@ -86,7 +86,7 @@ In order to test the game and the game only, an input-output implementation was 
 and the screen. It can be found in the package `game/pong/test/`, together with a `testing.py` module which can be
 executed stand-alone to test the game locally. 
 
-!!! example "Game controls *(click to expand)*"
+!!! example "Game controls"
     The local game supports two players: the left player should use:
 
     - ++w++ for moving the paddle upwards,
