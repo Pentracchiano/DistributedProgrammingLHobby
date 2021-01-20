@@ -4,6 +4,10 @@ The system is structured as a __client-server__ architecture. Clients communicat
 and __websocket__ connections. The server makes use of a __database__ to store information about the users and the 
 matches.
 
+!!! success "Cross-platform support"
+    Since the architecture only makes use of _language agnostic_ protocols, such as HTTP and Websocket, clients are free
+    to be implemented independently of the language or platform.
+
 
 ## Diagram
 
@@ -95,7 +99,7 @@ to keep track of their progress.
 ### Tokens
 
 The token based authentication provided by the Django REST framework is used to allow users to verify their identity.  
-After the registration of a new user, the [login function](../interfaces/REST_API.md#get-authorization-token) returns 
+After the registration of a new user, the [login function](../interfaces/rest-api.md#get-authorization-token) returns 
 the token associated with the user. This token is then used to access the authenticated API.
 
 In order to verify the identity of the user, tokens are stored in a SQL table and associated with the corresponding 
@@ -112,15 +116,14 @@ user ID as follows:
 
 #### API
 
-Users can register to the platform through the server API. (con la post) 
-After signing up each user is associated to a token used to authenticate themself when logging in.
+Users can [register](../interfaces/rest-api.md#create-a-new-user) to the platform through the server API. 
 
-Once authenticated, users can access the list of registered users, ongoing matches and completed matches. (e vedere le info filtrate)
+Once authenticated, users can access the list of registered users, ongoing matches and completed matches. 
 
 Through a POST operation on the server API, users can create a new ongoing match, for which they'll assume the role of 
 host. The server returns the ID of the match.
 
-For further detail, check the [REST API section](../interfaces/REST_API.md)
+For further detail, check the [REST API section](../interfaces/rest-api.md)
 
 #### WebSockets
 
@@ -137,18 +140,17 @@ For further detail, check the [websocket section](../interfaces/websockets.md).
 Clients interact both with the API and the Websocket server.
 
 After the connection is established and both players are ready, the clients can start a session and begin exchanging
-information with the server through the socket.
+information with the server through the sockets.
 
 The nature of the exchanged messages depends on the ```role``` of the client.
 
 After creating a new ongoing match, hosts shall wait for an available challenger.
 
-Challengers can join an ongoing match and signal they're ready to play by pressing ++enter++.
-
-When the challenger is ready, the host can start the match by pressing ++enter++.
+Challengers can join an ongoing match and signal they're ready to play. When the challenger is ready, the host can 
+tart the match.
 
 Through the duration of the match, the players can use the socket to send commands to the server so it can update 
 the state of the game. 
 The commands can be: _up_, _down_, _fast up_, _fast down_.
 
-
+The game ends when one of the players reaches the maximum score and the match results are stored in the database.
