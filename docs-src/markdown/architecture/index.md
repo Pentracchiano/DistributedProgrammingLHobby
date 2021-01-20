@@ -14,7 +14,7 @@ matches.
 The following diagram provides an abstract overall outline of the entities in the system and the relationship between 
 them, presenting an example of a use case of the system.
 
-![Diagramma](/assets/Opera_senza_titolo.gif)
+![Diagramma](../assets/diagram.gif)
 
 ## Database 
 
