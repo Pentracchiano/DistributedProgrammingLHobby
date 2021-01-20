@@ -3,7 +3,7 @@ site_name: LHobby
 repo_url: https://github.com/manudarmi/DistributedProgrammingLHobby
 repo_name: "Github: LHobby"
 
-use_directory_urls: false
+use_directory_urls: true
 
 docs_dir: markdown
 
@@ -42,9 +42,9 @@ nav:
   - Architecture:
       - 'Overview': 'architecture/index.md'
   - Interfaces and protocols:
-      - 'REST API': 'interfaces/REST_API.md'
+      - 'REST API': 'interfaces/rest-api.md'
       - 'Websockets': 'interfaces/websockets.md'
   - 'Code description and examples':
       - 'Project structure': 'code-description-and-examples/index.md'
-      - 'REST API': 'code-description-and-examples/rest_api.md'
+      - 'REST API': 'code-description-and-examples/rest-api.md'
       - 'Pong inner workings': 'code-description-and-examples/game.md'

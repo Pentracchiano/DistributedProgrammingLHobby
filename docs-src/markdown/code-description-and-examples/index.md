@@ -3,16 +3,18 @@ The highlighted packages are the most interesting packages - that is, containing
 most of the logic of the project.
 
 !!! abstract "Directory tree"
-    ```hl_lines="10 32 42"
+    ```hl_lines="12 34 44"
     ├── DistributedProgrammingLHobby
     │   ├── __init__.py
     │   ├── asgi.py
     │   ├── settings.py
     │   ├── urls.py
     │   └── wsgi.py
-    ├── docs
+    ├── docs-src
     │   ├── markdown
-    │   │   ├── ... (this documentation files)
+    │   │   ├── ... (these documentation files as markdown sources)
+    ├── docs
+    │   └── ... (these HTML files)
     ├── game
     │   ├── authentication
     │   │   └── token.py
