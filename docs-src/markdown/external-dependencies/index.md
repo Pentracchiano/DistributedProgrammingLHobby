@@ -37,6 +37,8 @@ Django REST framework adapts Django normal operations to work with HTTP methods 
 
 This particular framework was chosen because well integrated with the Django ORM: resources are, if necessary,
 able to be directly mapped to Django models.
+Moreover, it exposes a Browsable API: if you navigate to a REST endpoint, you can use it seamlessly in a nice user interface
+directly from the browser. This grants a nice client for the API and was also very useful during the development.
 
 ### [Websockets](https://tools.ietf.org/html/rfc6455)
 
