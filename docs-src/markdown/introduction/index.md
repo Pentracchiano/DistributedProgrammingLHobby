@@ -3,7 +3,7 @@
 ## Scope
 
 This documentation describes the development of the final project for the Distributed Programming class 2020/21 of 
-University of Salerno. It is intended to demonstrate and put to practice the knowledge acquired during the course. 
+University of Salerno. The project intends to demonstrate and put to practice the knowledge acquired during the course. 
 
 ### Group
 
@@ -29,8 +29,4 @@ It is possible to create or join a match as player or spectator, and after the g
 
 Since the platform makes use of language agnostic protocols, it is possible to link _cross-platform_ clients to it.
 
-## Navigating the docs
-
-todo
-
-Check how to getting started and install __LHobby__ in the next section.
+Check how to get started and install __LHobby__ in the next section.
