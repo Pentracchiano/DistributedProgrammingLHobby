@@ -93,7 +93,7 @@ If a client sends a message without the `command` keyword, the websocket server 
 
 #### Challenger ready
 
-A challenger to communicate that it is ready to play must send the following command:
+A challenger in order to communicate that is ready to play must send the following command:
 
 ```json
 
