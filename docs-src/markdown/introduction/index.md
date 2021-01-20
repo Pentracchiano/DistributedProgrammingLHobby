@@ -32,3 +32,5 @@ Since the platform makes use of language agnostic protocols, it is possible to l
 ## Navigating the docs
 
 todo
+
+Check how to getting started and install __LHobby__ in the next section.
