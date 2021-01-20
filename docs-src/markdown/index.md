@@ -20,7 +20,7 @@ This project was made by group 7, composed by:
 LHobby is a _distributed platform_ that lets users challenge their friends in a real time multiplayer game: __Pong__.
 
 <p align="center">
-  <img src="../assets/pong.gif">
+  <img src="assets/pong.gif">
 </p>
 
 The platforms keeps track of users past matches and progress, allowing competition among players.

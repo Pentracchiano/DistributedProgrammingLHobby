@@ -36,7 +36,7 @@ markdown_extensions:
 
 nav:
   - Introduction:
-      - LHobby: 'introduction/index.md'
+      - LHobby: 'index.md'
       - Installation: 'introduction/installation.md'
       - Usage: 'introduction/usage.md'
   - 'External dependencies': 'external-dependencies/index.md'
