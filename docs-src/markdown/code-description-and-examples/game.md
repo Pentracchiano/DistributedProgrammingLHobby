@@ -112,6 +112,38 @@ That is why the `game/pong_output_consumer.py` module was created. Its responsib
 the `Output` and sending them at the Django Channels group of the corresponding match. Then, each websocket will send
 to its client the message with the game status update.
 
+The output queue inserts a `#!python "message_type"` key in the dictionary in order to propagate which of the
+three methods created the `data` object which was put in the queue.
+Here is a snippet which shows this behaviour:
+
+```python
+from game.pong.queue.circular_queue import CircularQueue
+
+
+class QueueOutput:
+    STATUS = 'status'
+    INIT = 'init'
+    END = 'end'
+
+    def __init__(self, max_size: int):
+        self.queue = CircularQueue(max_size)
+
+    def __call__(self, game_status: dict):
+        game_status_with_type = {'message_type': QueueOutput.STATUS}
+        game_status_with_type.update(game_status)
+        self.queue.put_nowait(game_status_with_type)
+
+    def init(self, game_info: dict):
+        game_info_with_type = {'message_type': QueueOutput.INIT}
+        game_info_with_type.update(game_info)
+        self.queue.put_nowait(game_info_with_type)
+
+    def end_game(self, game_info: dict):
+        game_info_with_type = {'message_type': QueueOutput.END}
+        game_info_with_type.update(game_info)
+        self.queue.put_nowait(game_info_with_type)
+```
+
 The whole implementation of this is found in `game/pong/queue/`.
 
 !!!caution
